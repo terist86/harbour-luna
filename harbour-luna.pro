@@ -23,6 +23,7 @@ OTHER_FILES += qml/harbour-luna.qml \
     qml/pages/EditLunaDlg.qml \
     qml/pages/NotesPage.qml \
     qml/pages/EditNoteDlg.qml \
+    qml/pages/EditBleedingDlg.qml \
     qml/pages/Qlecti.js \
     qml/pages/Persistence.js \
     qml/pages/Algo.js \
@@ -33,8 +34,8 @@ OTHER_FILES += qml/harbour-luna.qml \
     translations/*.ts \
     harbour-luna.desktop
 
-#SAILFISHAPP_ICONS = 86x86 108x108 128x128 256x256
-SAILFISHAPP_ICONS = 86x86
+SAILFISHAPP_ICONS = 86x86 108x108 128x128 256x256
+#SAILFISHAPP_ICONS = 86x86
 
 # to disable building translations every time, comment out the
 # following CONFIG line
@@ -47,5 +48,11 @@ SAILFISHAPP_ICONS = 86x86
 TRANSLATIONS += translations/harbour-luna-de.ts
 
 DISTFILES += \
-    qml/pages/AboutPage.qml
+    qml/components/LunaCalendar.qml \
+    qml/pages/AboutPage.qml \
+    qml/pages/DailyDetail.qml \
+    qml/pages/Luna.js \
+    qml/pages/Note.js \
+    qml/pages/components/BleedingForm.qml \
+    qml/pages/components/SettingsMenu.qml
 
