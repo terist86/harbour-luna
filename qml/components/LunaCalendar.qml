@@ -12,6 +12,12 @@ Item {
 
     property alias date: datePicker.date
 
+    property int __renderVersion: 0
+
+    function forceRefresh() {
+        __renderVersion++
+    }
+
     signal editNote(var date)
     signal editBleeding(var date)
 
@@ -65,9 +71,9 @@ Item {
                     border.width: 0
                 }
 
-                function getBleeding() {
-                    if (!lunaInfo)
-                        return null
+                property var bleedingData: {
+                    root.__renderVersion
+                    if (!lunaInfo) return null
                     var res = Bleeding.get(lunaInfo.dbid, cellDate)
                     return res !== "" ? res : null
                 }
@@ -100,10 +106,7 @@ Item {
                     spacing: -Theme.paddingSmall / 2
 
                     Repeater {
-                        model: {
-                            var b = getBleeding()
-                            return b ? b.intensity + 1 : 0
-                        }
+                        model: bleedingData ? bleedingData.intensity + 1 : 0
                         Image {
                             source: 'qrc:/icons/scalable/blood-drop.svg'
                             width: Theme.iconSizeExtraSmall / 1.5

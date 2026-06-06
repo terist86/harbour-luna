@@ -72,37 +72,48 @@ function remove(b) {
 }
 
 function calculateLunaCycle(lunaId) {
-    var res = ""
-    Persistence.database().readTransaction(function (tx) {
-        var rs = tx.executeSql(" \
-WITH cicle_days AS ( \
-SELECT strftime('%s', day) as day, \
-LAG(strftime('%s', day)) OVER (ORDER BY day) AS prev_day \
-FROM bleedings \
-WHERE lunaId = ? AND NOT excluded \
-) \
-SELECT \
-day AS day1ms, \
-(day - LAG(day) OVER (ORDER BY day)) / 86400 AS cycle \
-FROM cicle_days \
-WHERE prev_day IS NULL \
-OR (day - prev_day) > 86400 \
-ORDER BY day DESC", [lunaId])
-        if (rs.rows.length > 1) {
-            var sum = 0
-            // last row has no set cycle value. We must skip them
-            for (var i = rs.rows.length - 2; i >= 0; --i) {
-                sum += rs.rows.item(i).cycle
-            }
-            var avg_cycle = sum / (rs.rows.length - 2)
+    var starts = _getPeriodStarts(lunaId)
+    if (starts.length < 2) {
+        console.log("[DEBUG] calculateLunaCycle lunaId=" + lunaId + " starts.length=" + starts.length + " < 2, returning empty")
+        return ""
+    }
 
-            res = {
-                "day1ms": rs.rows.item(0).day1ms,
-                "cycle": avg_cycle
-            }
+    var chronological = []
+    for (var i = starts.length - 1; i >= 0; i--) {
+        chronological.push(starts[i])
+    }
+
+    var intervals = []
+    for (var i = 1; i < chronological.length; i++) {
+        var interval = (chronological[i] - chronological[i - 1]) / 86400000
+        intervals.push(interval)
+    }
+
+    // Filter outliers: only consider intervals between 20 and 45 days
+    var filtered = []
+    for (var i = 0; i < intervals.length; i++) {
+        if (intervals[i] >= 20 && intervals[i] <= 45) {
+            filtered.push(intervals[i])
         }
-    })
-    return res
+    }
+
+    if (filtered.length === 0) {
+        console.log("[DEBUG] calculateLunaCycle lunaId=" + lunaId + " no valid intervals (20-45d) after filtering, returning empty")
+        return ""
+    }
+
+    var sum = 0
+    for (var i = 0; i < filtered.length; i++) {
+        sum += filtered[i]
+    }
+    var avgCycle = sum / filtered.length
+
+    console.log("[DEBUG] calculateLunaCycle lunaId=" + lunaId + " chronological=[" + chronological.join(",") + "] intervals=[" + intervals.join(",") + "] filtered=[" + filtered.join(",") + "] avg=" + avgCycle + " day1ms=" + starts[0])
+
+    return {
+        "day1ms": starts[0],
+        "cycle": avgCycle
+    }
 }
 
 function _getPeriodStarts(lunaId) {
@@ -127,22 +138,31 @@ function _getPeriodStarts(lunaId) {
             }
         }
     })
+    console.log("[DEBUG] _getPeriodStarts lunaId=" + lunaId + " starts=" + JSON.stringify(starts))
     return starts.reverse()
 }
 
 function getActualDay1ms(lunaId) {
     var starts = _getPeriodStarts(lunaId)
-    return starts.length > 0 ? starts[0] : ""
+    var res = starts.length > 0 ? starts[0] : ""
+    console.log("[DEBUG] getActualDay1ms lunaId=" + lunaId + " starts=[" + starts.join(",") + "] return=" + res)
+    return res
 }
 
 function autoFillMissingPeriodDays(lunaId, savedDay) {
     var luna = Luna.get(lunaId)
     if (!luna) return
     var day1ms = luna.day1ms
-    if (!day1ms) return
+    if (!day1ms) {
+        console.log("[DEBUG] autoFillMissingPeriodDays lunaId=" + lunaId + " no day1ms, skip")
+        return
+    }
 
     var starts = _getPeriodStarts(lunaId)
-    if (starts.length === 0) return
+    if (starts.length === 0) {
+        console.log("[DEBUG] autoFillMissingPeriodDays lunaId=" + lunaId + " no period starts, skip")
+        return
+    }
 
     var refStart = null
     var refEnd = null
@@ -157,6 +177,7 @@ function autoFillMissingPeriodDays(lunaId, savedDay) {
         refStart = starts[0]
         refEnd = refStart + 365 * 86400000
     }
+    console.log("[DEBUG] autoFillMissingPeriodDays lunaId=" + lunaId + " day1ms=" + day1ms + " savedDay=" + savedDay + " refStart=" + refStart + " refEnd=" + refEnd)
 
     var today = Algo.todayMS()
 
@@ -164,12 +185,16 @@ function autoFillMissingPeriodDays(lunaId, savedDay) {
         var rs = tx.executeSql(
             "SELECT day, intensity FROM bleedings WHERE lunaId=? AND day>=? AND day<? AND NOT excluded ORDER BY day ASC",
             [lunaId, refStart, refEnd])
-        if (rs.rows.length === 0) return
+        if (rs.rows.length === 0) {
+            console.log("[DEBUG] autoFill: no ref period entries, skip")
+            return
+        }
 
         var lastDay = rs.rows.item(rs.rows.length - 1).day
         var refDuration = Math.floor((lastDay - refStart) / 86400000) + 1
 
         var fillEnd = savedDay !== undefined ? Math.min(savedDay, today) : today
+        console.log("[DEBUG] autoFill: refDuration=" + refDuration + " fillEnd=" + fillEnd + " today=" + today)
 
         for (var offset = 0; offset < refDuration; offset++) {
             var currentDay = day1ms + offset * 86400000
@@ -186,26 +211,29 @@ function autoFillMissingPeriodDays(lunaId, savedDay) {
                 "SELECT intensity FROM bleedings WHERE lunaId=? AND day=?",
                 [lunaId, prevDay])
             if (ref.rows.length === 1) {
+                var intensity = ref.rows.item(0).intensity
+                console.log("[DEBUG] autoFill: offset=" + offset + " fill day=" + currentDay + " (from ref day=" + prevDay + " intensity=" + intensity + ")")
                 tx.executeSql(
                     "INSERT INTO bleedings (lunaId, day, intensity, excluded) VALUES (?, ?, ?, ?)",
-                    [lunaId, currentDay, ref.rows.item(0).intensity, false])
+                    [lunaId, currentDay, intensity, false])
             }
         }
     })
 
-    var actualDay1ms = getActualDay1ms(lunaId)
-    if (actualDay1ms !== "" && actualDay1ms !== luna.day1ms) {
-        luna.day1ms = actualDay1ms
-        Luna.update(luna)
-    }
+    console.log("[DEBUG] autoFill: calling updateLunaCycle for lunaId=" + lunaId)
+    updateLunaCycle(lunaId)
 }
 
 function updateLunaCycle(lunaId) {
+    var actualDay1ms = getActualDay1ms(lunaId)
+    if (actualDay1ms === "") return
+
     var _luna = Luna.get(lunaId)
-    var new_cycle = calculateLunaCycle(lunaId)
-    if (!!new_cycle) {
-        _luna.cycle = new_cycle.cycle
-        _luna.day1ms = new_cycle.day1ms
+    if (!_luna) return
+
+    if (_luna.day1ms !== actualDay1ms) {
+        _luna.day1ms = actualDay1ms
         Luna.update(_luna)
+        console.log("[DEBUG] updateLunaCycle lunaId=" + lunaId + " updated day1ms to " + actualDay1ms)
     }
 }

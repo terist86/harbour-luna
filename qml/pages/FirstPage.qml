@@ -212,9 +212,16 @@ Page {
     onStatusChanged: {
         if (status === PageStatus.Activating && updateAfterManage) {
             updateAfterManage = false
-            //console.log("Activating");
             Ql.on(lunasModel).at(lunaView.currentIndex, function (luna) {
+                var actualDay1ms = Bleeding.getActualDay1ms(luna.dbid)
+                if (actualDay1ms !== "") {
+                    lunasModel.setProperty(lunaView.currentIndex, "effectiveDay1ms", actualDay1ms)
+                    if (actualDay1ms !== luna.day1ms) {
+                        lunasModel.setProperty(lunaView.currentIndex, "day1ms", actualDay1ms)
+                    }
+                }
                 page.fillLunaInfo(luna)
+                datePicker.forceRefresh()
             }).empty(function () {
                 appWindow.coverInfo = undefined
                 dateColumn.pickerLunaInfo = undefined
@@ -264,13 +271,12 @@ Page {
         }
 
         Note.icons(icons, g.dbid)
-        //console.log(icons);
         dateColumn.pickerLunaInfo = {
             "colorArr": colors,
             "opacityArr": opacitys,
             "iconArr": icons,
             "cycle": g.cycle,
-            "day1ms": g.day1ms,
+            "day1ms": g.effectiveDay1ms || g.day1ms,
             "dbid": g.dbid
         }
 
@@ -281,11 +287,6 @@ Page {
             "nextOv": g.coverOv,
             "nextMn": g.coverMn
         }
-
-
-        /*console.log(g.name);
-        console.log(colors);
-        console.log(opacitys);*/
     }
 
     Component.onCompleted: {
@@ -302,10 +303,17 @@ Page {
             var actualDay1ms = Bleeding.getActualDay1ms(g.dbid)
             var effectiveDay1ms = actualDay1ms !== "" ? actualDay1ms : g.day1ms
 
+            // Keep model day1ms in sync with DB after autoFillMissingPeriodDays
+            if (actualDay1ms !== "" && actualDay1ms !== g.day1ms) {
+                lunasModel.setProperty(i, "day1ms", actualDay1ms)
+            }
+
             var _daysInCycle = Algo.daysInCycle(g.cycle, effectiveDay1ms, curDayMS)
             var ov = Algo.nextOvDays(_daysInCycle, g.cycle)
             var mn = Algo.nextMnDays(_daysInCycle, g.cycle)
             var today = Algo.formatDays(0)
+
+            console.log("[DEBUG] luna[" + i + "] '" + g.name + "': storedDay1ms=" + g.day1ms + " actualDay1ms=" + actualDay1ms + " effectiveDay1ms=" + effectiveDay1ms + " cycle=" + g.cycle + " daysInCycle=" + (_daysInCycle + 1) + " nextOv=" + ov + " nextMn=" + mn)
 
             lunasModel.setProperty(i, "dayInCycle", _daysInCycle + 1)
             lunasModel.setProperty(i, "effectiveDay1ms", effectiveDay1ms)
