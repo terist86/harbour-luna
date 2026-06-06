@@ -196,7 +196,11 @@ function autoFillMissingPeriodDays(lunaId, savedDay) {
         var fillEnd = savedDay !== undefined ? Math.min(savedDay, today) : today
         console.log("[DEBUG] autoFill: refDuration=" + refDuration + " fillEnd=" + fillEnd + " today=" + today)
 
-        for (var offset = 0; offset < refDuration; offset++) {
+        // When using next/current period as fallback, don't fill before refStart
+        var fillStart = refStart > day1ms ? refStart : day1ms
+        var startOffset = Math.round((fillStart - day1ms) / 86400000)
+
+        for (var offset = startOffset; offset < refDuration; offset++) {
             var currentDay = day1ms + offset * 86400000
             if (currentDay > fillEnd) break
             if (currentDay === savedDay) continue
@@ -206,7 +210,7 @@ function autoFillMissingPeriodDays(lunaId, savedDay) {
                 [lunaId, currentDay])
             if (exists.rows.length > 0) continue
 
-            var prevDay = refStart + offset * 86400000
+            var prevDay = refStart + (offset - startOffset) * 86400000
             var ref = tx.executeSql(
                 "SELECT intensity FROM bleedings WHERE lunaId=? AND day=?",
                 [lunaId, prevDay])
