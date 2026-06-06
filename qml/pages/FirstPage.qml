@@ -293,17 +293,12 @@ Page {
         Persistence.initialize()
         Luna.populate(lunasModel)
 
-        Ql.on(lunasModel).each(function (g) {
-            Bleeding.autoFillMissingPeriodDays(g.dbid)
-        })
-
         var curDayMS = Algo.todayMS()
 
         Ql.on(lunasModel).each(function (g, i) {
             var actualDay1ms = Bleeding.getActualDay1ms(g.dbid)
             var effectiveDay1ms = actualDay1ms !== "" ? actualDay1ms : g.day1ms
 
-            // Keep model day1ms in sync with DB after autoFillMissingPeriodDays
             if (actualDay1ms !== "" && actualDay1ms !== g.day1ms) {
                 lunasModel.setProperty(i, "day1ms", actualDay1ms)
             }

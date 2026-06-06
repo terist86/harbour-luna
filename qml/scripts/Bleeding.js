@@ -193,6 +193,36 @@ function autoFillMissingPeriodDays(lunaId, savedDay) {
         var lastDay = rs.rows.item(rs.rows.length - 1).day
         var refDuration = Math.floor((lastDay - refStart) / 86400000) + 1
 
+        // Build intensity array with gap-filling from the reference period
+        var refIntensity = []
+        for (var r = 0; r < rs.rows.length; r++) {
+            var row = rs.rows.item(r)
+            var idx = Math.round((row.day - refStart) / 86400000)
+            refIntensity[idx] = row.intensity
+        }
+        // Fill gaps: look back for last known intensity
+        for (var d = 1; d < refDuration; d++) {
+            if (refIntensity[d] === undefined) {
+                for (var b = d - 1; b >= 0; b--) {
+                    if (refIntensity[b] !== undefined) {
+                        refIntensity[d] = refIntensity[b]
+                        break
+                    }
+                }
+            }
+        }
+        // Fill leading gaps: look forward for next known intensity
+        for (var d = refDuration - 2; d >= 0; d--) {
+            if (refIntensity[d] === undefined) {
+                for (var f = d + 1; f < refDuration; f++) {
+                    if (refIntensity[f] !== undefined) {
+                        refIntensity[d] = refIntensity[f]
+                        break
+                    }
+                }
+            }
+        }
+
         var fillEnd = savedDay !== undefined ? Math.min(savedDay, today) : today
         console.log("[DEBUG] autoFill: refDuration=" + refDuration + " fillEnd=" + fillEnd + " today=" + today)
 
@@ -210,13 +240,9 @@ function autoFillMissingPeriodDays(lunaId, savedDay) {
                 [lunaId, currentDay])
             if (exists.rows.length > 0) continue
 
-            var prevDay = refStart + (offset - startOffset) * 86400000
-            var ref = tx.executeSql(
-                "SELECT intensity FROM bleedings WHERE lunaId=? AND day=?",
-                [lunaId, prevDay])
-            if (ref.rows.length === 1) {
-                var intensity = ref.rows.item(0).intensity
-                console.log("[DEBUG] autoFill: offset=" + offset + " fill day=" + currentDay + " (from ref day=" + prevDay + " intensity=" + intensity + ")")
+            var intensity = refIntensity[offset - startOffset]
+            if (intensity !== undefined) {
+                console.log("[DEBUG] autoFill: offset=" + offset + " fill day=" + currentDay + " intensity=" + intensity)
                 tx.executeSql(
                     "INSERT INTO bleedings (lunaId, day, intensity, excluded) VALUES (?, ?, ?, ?)",
                     [lunaId, currentDay, intensity, false])
