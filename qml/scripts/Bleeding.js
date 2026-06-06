@@ -9,7 +9,7 @@ function emptyBleedingInfo(lunaId) {
     return {
         "dbid": 0,
         "lunaId": lunaId,
-        "day": Date.now(),
+        "day": Algo.todayMS(),
         "intensity": 2,
         "excluded": false
     }
