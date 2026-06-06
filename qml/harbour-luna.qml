@@ -38,7 +38,7 @@ ApplicationWindow
 
 	property var coverInfo
 
-	initialPage: Component { FirstPage { } }
+	initialPage: Component { CyclePage { } }
 	cover: Qt.resolvedUrl("cover/CoverPage.qml")
 	allowedOrientations: Orientation.All
     _defaultPageOrientations: Orientation.Portrait

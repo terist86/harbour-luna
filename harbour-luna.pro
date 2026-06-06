@@ -18,8 +18,8 @@ SOURCES += src/harbour-luna.cpp
 
 OTHER_FILES += qml/harbour-luna.qml \
     qml/cover/CoverPage.qml \
-    qml/pages/FirstPage.qml \
-    qml/pages/SecondPage.qml \
+    qml/pages/CyclePage.qml \
+    qml/pages/ProfilesPage.qml \
     qml/pages/EditLunaDlg.qml \
     qml/pages/EditBleedingDlg.qml \
     qml/scripts/Qlecti.js \

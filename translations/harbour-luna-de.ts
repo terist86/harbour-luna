@@ -28,7 +28,7 @@
     </message>
 </context>
 <context>
-    <name>FirstPage</name>
+    <name>CyclePage</name>
     <message>
         <source>Manage Girls</source>
         <translation type="unfinished"></translation>
@@ -47,7 +47,7 @@
     </message>
 </context>
 <context>
-    <name>SecondPage</name>
+    <name>ProfilesPage</name>
     <message>
         <source>New Girl</source>
         <translation type="unfinished"></translation>

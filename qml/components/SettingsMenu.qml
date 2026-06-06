@@ -48,7 +48,7 @@ PullDownMenu {
         text: qsTr("Edit Profiles")
         onClicked: {
             console.log("lunasModel: " + model)
-            var pg = pageStack.push(Qt.resolvedUrl("../pages/SecondPage.qml"), {
+            var pg = pageStack.push(Qt.resolvedUrl("../pages/ProfilesPage.qml"), {
                                         "lunasModel": model
                                     })
             root.profilesEdited()
