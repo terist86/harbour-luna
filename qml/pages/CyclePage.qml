@@ -81,7 +81,7 @@ Page {
             spacing: 0
             PageHeader {
                 id: header
-                title: "Luna"
+                title: lunasModel.count > 0 ? lunasModel.get(lunaView.currentIndex).name : "Luna"
                 visible: isPortrait
             }
             Item {
