@@ -22,6 +22,7 @@ OTHER_FILES += qml/harbour-luna.qml \
     qml/pages/ProfilesPage.qml \
     qml/pages/EditLunaDlg.qml \
     qml/pages/EditBleedingDlg.qml \
+    qml/pages/EditSexDlg.qml \
     qml/pages/DailyDetail.qml \
     qml/scripts/Qlecti.js \
     qml/scripts/Persistence.js \

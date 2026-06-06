@@ -6,6 +6,8 @@ Column {
     id: root
     property var model
 
+    property bool _contraceptionUsed: false
+
     width: parent.width
     spacing: Theme.paddingMedium
 
@@ -23,10 +25,6 @@ Column {
         else arr.push(idx)
         arr.sort()
         root.model.contraceptives = JSON.stringify(arr)
-    }
-
-    function _protected() {
-        return _contraceptives().length > 0
     }
 
     Label {
@@ -51,14 +49,19 @@ Column {
                 Rectangle {
                     anchors.fill: parent
                     radius: Theme.paddingSmall
-                    color: root.model && root.model.time_of_day === index ? Theme.highlightColor : Theme.rgba(Theme.primaryColor, 0.15)
+                    color: root.model && root.model.time_of_day === index
+                           ? Theme.rgba(Theme.highlightColor, 0.3)
+                           : Theme.rgba(Theme.primaryColor, 0.1)
+                    border.width: root.model && root.model.time_of_day === index ? 1 : 0
+                    border.color: Theme.highlightColor
                 }
 
                 Label {
                     anchors.centerIn: parent
                     text: Sex.timeOfDayLabels[index]
                     font.pixelSize: Theme.fontSizeTiny
-                    color: root.model && root.model.time_of_day === index ? Theme.highlightColor : Theme.primaryColor
+                    color: root.model && root.model.time_of_day === index
+                           ? Theme.highlightColor : Theme.primaryColor
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
                 }
@@ -79,82 +82,28 @@ Column {
     Row {
         width: parent.width - 2 * Theme.horizontalPageMargin
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: Theme.paddingLarge
+        spacing: Theme.paddingMedium
 
-        BackgroundItem {
-            width: (parent.width - parent.spacing) / 2
-            height: Theme.itemSizeMedium
-
-            Rectangle {
-                anchors.fill: parent
-                radius: Theme.paddingSmall
-                color: root.model && root.model.solo === 1 ? Theme.highlightColor : Theme.rgba(Theme.primaryColor, 0.15)
-            }
-
-            Label {
-                anchors.centerIn: parent
-                text: qsTr("Solo")
-                color: root.model && root.model.solo === 1 ? Theme.highlightColor : Theme.primaryColor
-            }
-
+        Button {
+            text: qsTr("Solo")
+            highlighted: root.model && root.model.solo === 1
             onClicked: {
                 if (root.model) {
                     root.model.solo = 1
                     root.model.ejaculation = 0
+                    root.model.contraceptives = "[]"
+                    _contraceptionUsed = false
                 }
             }
         }
 
-        BackgroundItem {
-            width: (parent.width - parent.spacing) / 2
-            height: Theme.itemSizeMedium
-
-            Rectangle {
-                anchors.fill: parent
-                radius: Theme.paddingSmall
-                color: root.model && root.model.solo === 0 ? Theme.highlightColor : Theme.rgba(Theme.primaryColor, 0.15)
-            }
-
-            Label {
-                anchors.centerIn: parent
-                text: qsTr("Partner")
-                color: root.model && root.model.solo === 0 ? Theme.highlightColor : Theme.primaryColor
-            }
-
+        Button {
+            text: qsTr("Partner")
+            highlighted: root.model && root.model.solo === 0
             onClicked: {
                 if (root.model) {
                     root.model.solo = 0
                 }
-            }
-        }
-    }
-
-    SectionHeader {
-        text: qsTr("Did you use contraceptives?")
-        visible: root.model && root.model.solo === 0
-    }
-
-    Repeater {
-        model: root.model && root.model.solo === 0 ? Sex.contraceptiveLabels.length : 0
-        delegate: TextSwitch {
-            text: Sex.contraceptiveLabels[index]
-            checked: root.model ? _contraceptives().indexOf(index) >= 0 : false
-            visible: root.model && root.model.solo === 0
-            onCheckedChanged: {
-                if (root.model && root.model.solo === 0) {
-                    _toggleContraceptive(index)
-                }
-            }
-        }
-    }
-
-    TextSwitch {
-        text: qsTr("Ejaculation into vagina?")
-        visible: root.model && root.model.solo === 0 && !_protected()
-        checked: root.model ? !!root.model.ejaculation : false
-        onCheckedChanged: {
-            if (root.model) {
-                root.model.ejaculation = checked ? 1 : 0
             }
         }
     }
@@ -165,21 +114,55 @@ Column {
         spacing: Theme.paddingMedium
         visible: root.model && root.model.solo === 0
 
-        Image {
-            id: iconPreview
-            source: _protected()
-                    ? 'qrc:/icons/scalable/condom.svg'
-                    : 'qrc:/icons/scalable/love.svg'
-            width: Theme.iconSizeMedium
-            height: width
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
         Label {
-            text: _protected() ? qsTr("Protected") : qsTr("Unprotected")
+            text: qsTr("Did you use contraceptives?")
             color: Theme.highlightColor
             font.pixelSize: Theme.fontSizeSmall
             anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Button {
+            text: qsTr("No")
+            highlighted: root.model && root.model.solo === 0 && !_contraceptionUsed
+            onClicked: {
+                if (root.model) {
+                    root.model.contraceptives = "[]"
+                    _contraceptionUsed = false
+                }
+            }
+        }
+
+        Button {
+            text: qsTr("Yes")
+            highlighted: root.model && root.model.solo === 0 && _contraceptionUsed
+            onClicked: {
+                _contraceptionUsed = true
+            }
+        }
+    }
+
+    Repeater {
+        model: root.model && root.model.solo === 0 && _contraceptionUsed
+               ? Sex.contraceptiveLabels.length : 0
+        delegate: TextSwitch {
+            text: Sex.contraceptiveLabels[index]
+            checked: root.model ? _contraceptives().indexOf(index) >= 0 : false
+            onCheckedChanged: {
+                if (root.model) {
+                    _toggleContraceptive(index)
+                }
+            }
+        }
+    }
+
+    TextSwitch {
+        text: qsTr("Ejaculation into vagina?")
+        visible: root.model && root.model.solo === 0 && !_contraceptionUsed
+        checked: root.model ? !!root.model.ejaculation : false
+        onCheckedChanged: {
+            if (root.model) {
+                root.model.ejaculation = checked ? 1 : 0
+            }
         }
     }
 
@@ -189,6 +172,7 @@ Column {
             if (model.solo === undefined) model.solo = 0
             if (model.contraceptives === undefined) model.contraceptives = "[]"
             if (model.ejaculation === undefined) model.ejaculation = 0
+            _contraceptionUsed = _contraceptives().length > 0
         }
     }
 }

@@ -58,67 +58,13 @@ Page {
             info.timestamp = Date.now()
         }
 
-        var dialog = pageStack.push(sexDialogComponent, {"sexInfo": info})
+        var dialog = pageStack.push(Qt.resolvedUrl("EditSexDlg.qml"), {
+                                        "sexInfo": info,
+                                        "date": selectedDate
+                                    })
         dialog.accepted.connect(function () {
             refresh()
         })
-    }
-
-    Component {
-        id: sexDialogComponent
-        Dialog {
-            id: sexDlg
-            property var sexInfo
-
-            DialogHeader {
-                title: sexInfo && sexInfo.dbid !== 0 ? qsTr("Edit sex activity") : qsTr("Add sex activity")
-            }
-
-            SilicaFlickable {
-                anchors.fill: parent
-                contentHeight: column.height
-
-                PushUpMenu {
-                    visible: sexInfo && sexInfo.dbid !== 0
-
-                    MenuItem {
-                        text: qsTr("Remove")
-                        onClicked: {
-                            Remorse.popupAction(sexDlg, qsTr("Sex activity was removed"),
-                                function () {
-                                    if (Sex.remove(sexInfo.dbid) === "OK") {
-                                        sexDlg.accept()
-                                    }
-                                })
-                        }
-                    }
-                }
-
-                Column {
-                    id: column
-                    anchors.top: parent.top
-                    anchors.topMargin: header.height
-                    spacing: Theme.paddingLarge
-                    width: parent.width
-
-                    SexForm {
-                        model: sexInfo
-                    }
-                }
-
-                VerticalScrollDecorator {}
-            }
-
-            canAccept: sexInfo && sexInfo.time_of_day >= 0 && sexInfo.solo >= 0
-
-            onAccepted: {
-                if (sexInfo.dbid === 0) {
-                    Sex.persist(sexInfo)
-                } else {
-                    Sex.update(sexInfo)
-                }
-            }
-        }
     }
 
     SilicaFlickable {
@@ -143,6 +89,49 @@ Page {
 
             PageHeader {
                 title: Qt.formatDate(selectedDate, Qt.DefaultLocaleLongDate)
+            }
+
+            Row {
+                width: parent.width - 2 * Theme.horizontalPageMargin
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: Theme.paddingMedium
+
+                IconButton {
+                    id: prevDay
+                    icon.source: "image://theme/icon-m-left"
+                    onClicked: {
+                        var d = new Date(selectedDate)
+                        d.setDate(d.getDate() - 1)
+                        selectedDate = d
+                    }
+                }
+
+                ValueButton {
+                    id: datePickerButton
+                    width: parent.width - prevDay.width - nextDay.width - 2 * parent.spacing
+                    label: qsTr("Date")
+                    value: Qt.formatDate(selectedDate, Qt.DefaultLocaleShortDate)
+                    onClicked: {
+                        var dialog = pageStack.push(
+                                    "Sailfish.Silica.DatePickerDialog", {
+                                        "date": selectedDate
+                                    })
+                        dialog.accepted.connect(function () {
+                            selectedDate = dialog.date
+                        })
+                    }
+                }
+
+                IconButton {
+                    id: nextDay
+                    icon.source: "image://theme/icon-m-right"
+                    enabled: selectedDate < new Date(Algo.todayMS())
+                    onClicked: {
+                        var d = new Date(selectedDate)
+                        d.setDate(d.getDate() + 1)
+                        selectedDate = d
+                    }
+                }
             }
 
             SectionHeader {
@@ -209,6 +198,8 @@ Page {
 
                         Image {
                             source: {
+                                if (model.solo === 1)
+                                    return 'qrc:/icons/scalable/love.svg'
                                 var c = model.contraceptives || "[]"
                                 var protectedSex = false
                                 try {
