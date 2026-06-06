@@ -22,6 +22,7 @@ OTHER_FILES += qml/harbour-luna.qml \
     qml/pages/ProfilesPage.qml \
     qml/pages/EditLunaDlg.qml \
     qml/pages/EditBleedingDlg.qml \
+    qml/pages/DailyDetail.qml \
     qml/scripts/Qlecti.js \
     qml/scripts/Persistence.js \
     qml/scripts/Algo.js \
@@ -48,9 +49,10 @@ TRANSLATIONS += translations/harbour-luna-de.ts
 DISTFILES += \
     qml/components/LunaCalendar.qml \
     qml/pages/AboutPage.qml \
-    qml/pages/DailyDetail.qml \
     qml/scripts/Luna.js \
+    qml/scripts/Sex.js \
     qml/components/BleedingForm.qml \
+    qml/components/SexForm.qml \
     qml/components/SettingsMenu.qml
 
 resources.files = \

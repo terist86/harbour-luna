@@ -2,6 +2,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import "../scripts/Algo.js" as Algo
 import "../scripts/Bleeding.js" as Bleeding
+import "../scripts/Sex.js" as Sex
 
 Item {
     id: root
@@ -18,7 +19,7 @@ Item {
         __renderVersion++
     }
 
-    signal editBleeding(var date)
+    signal showDayDetail(var date)
 
     width: parent.width
     height: datePicker.height + weekDaysSimulator.height
@@ -77,6 +78,12 @@ Item {
                     return res !== "" ? res : null
                 }
 
+                property var sexData: {
+                    root.__renderVersion
+                    if (!lunaInfo) return []
+                    return Sex.getAll(lunaInfo.dbid, cellDate) || []
+                }
+
                 Label {
                     property bool _today: {
                         return datePicker.day === model.day
@@ -120,20 +127,24 @@ Item {
                     spacing: -Theme.paddingSmall / 2
 
                     Image {
-                        source: 'qrc:/icons/scalable/kiss.svg'
-                        visible: false
-                        width: Theme.iconSizeExtraSmall
-                        height: width
-                    }
-                    Image {
                         source: 'qrc:/icons/scalable/condom.svg'
-                        visible: false
+                        visible: sexData && sexData.some(function(e) {
+                            if (e.solo === 1) return false
+                            var c = e.contraceptives || "[]"
+                            try { return JSON.parse(c).length > 0 }
+                            catch (ex) { return false }
+                        })
                         width: Theme.iconSizeExtraSmall
                         height: width
                     }
                     Image {
                         source: 'qrc:/icons/scalable/love.svg'
-                        visible: false
+                        visible: sexData && sexData.some(function(e) {
+                            if (e.solo === 1) return false
+                            var c = e.contraceptives || "[]"
+                            try { return JSON.parse(c).length === 0 }
+                            catch (ex) { return false }
+                        })
                         width: Theme.iconSizeExtraSmall
                         height: width
                     }
@@ -146,7 +157,7 @@ Item {
                 onDoubleClicked: {
                     var _d = new Date(cellDate)
                     datePicker.date = _d
-                    editBleeding(_d)
+                    showDayDetail(_d)
                 }
             }
         }

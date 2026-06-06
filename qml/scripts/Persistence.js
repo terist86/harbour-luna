@@ -30,5 +30,13 @@ function initialize() {
         db = database()
         console.log("Upgrade db to version 1.1")
     }
+    if (ver === "1.1") {
+        db.changeVersion("1.1", "1.2", function (tx) {
+            tx.executeSql(
+                        'CREATE TABLE IF NOT EXISTS sexual_activity(dbid INTEGER PRIMARY KEY AUTOINCREMENT, lunaId INTEGER, day BIGINT, time_of_day INTEGER, solo INTEGER, contraceptives TEXT, ejaculation INTEGER, timestamp BIGINT)')
+        })
+        db = database()
+        console.log("Upgrade db to version 1.2")
+    }
     console.log("Current db version '" + db.version + "'")
 }

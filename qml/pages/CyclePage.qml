@@ -93,9 +93,12 @@ Page {
             LunaCalendar {
                 id: datePicker
                 lunaInfo: dateColumn.pickerLunaInfo
-                onEditBleeding: {
+                onShowDayDetail: {
                     var _lunaInfo = lunasModel.get(lunaView.currentIndex)
-                    page.editBleedingForDate(_lunaInfo.dbid, date)
+                    pageStack.push(Qt.resolvedUrl("DailyDetail.qml"), {
+                                       "lunaId": _lunaInfo.dbid,
+                                       "selectedDate": date
+                                   })
                 }
             }
         }
