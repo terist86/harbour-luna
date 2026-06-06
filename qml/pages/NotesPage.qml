@@ -258,17 +258,17 @@ Page {
     }
 
     onStatusChanged: {
-        //console.log(status)
         if (status === PageStatus.Inactive) {
             var pop = pageStack.find(function (_page) {
                 return _page === page
             })
-            //console.log(pop);
             if (!pop) {
-                var noteInfo = notesModel.get(lunaInfo.dayInCycle - 1)
-                console.log(noteInfo.title)
-                if (lunaInfo.noteTitle !== noteInfo.title) {
-                    currentNoteChanged(noteInfo.title)
+                var idx = lunaInfo.dayInCycle - 1
+                if (idx >= 0 && idx < notesModel.count) {
+                    var noteInfo = notesModel.get(idx)
+                    if (lunaInfo.noteTitle !== noteInfo.title) {
+                        currentNoteChanged(noteInfo.title)
+                    }
                 }
             }
         }

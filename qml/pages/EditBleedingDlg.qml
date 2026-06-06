@@ -40,7 +40,7 @@ Dialog {
 
     property alias bleedingInfo: bleedingForm.model
     property alias date: bleedingDayRow.selectedDate
-    property bool updateAfterManage: false
+    property bool _removed: false
 
     DialogHeader {
         id: header
@@ -64,7 +64,7 @@ Dialog {
                                         function () {
                                             if (Bleeding.remove(
                                                         bleedingInfo) === "OK") {
-                                                updateAfterManage = true
+                                                page._removed = true
                                                 page.accept()
                                             }
                                         })
@@ -170,6 +170,7 @@ Dialog {
     }
 
     onAccepted: {
+        if (page._removed) return
         if (bleedingInfo.dbid === 0) {
             var savedDay = bleedingInfo.day
             Bleeding.persist(bleedingInfo)
@@ -177,7 +178,6 @@ Dialog {
         } else {
             Bleeding.update(bleedingInfo)
         }
-        updateAfterManage = true
     }
 
     canAccept: bleedingDayRow.selectedDate <= new Date(Algo.todayMS()) && bleedingForm.intensity >= 0

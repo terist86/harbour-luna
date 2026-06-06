@@ -51,6 +51,8 @@ Page {
         SettingsMenu {
             model: lunasModel
             activeLunaIdx: lunaView.currentIndex
+            onProfilesEdited: updateAfterManage = true
+            onProfileSelected: lunaView.currentIndex = idx
         }
 
         PushUpMenu {

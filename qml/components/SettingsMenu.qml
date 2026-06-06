@@ -41,6 +41,9 @@ PullDownMenu {
         text: qsTr("About Luna")
         onClicked: pageStack.push(Qt.resolvedUrl("../pages/AboutPage.qml"))
     }
+    signal profilesEdited()
+    signal profileSelected(int idx)
+
     MenuItem {
         text: qsTr("Edit Profiles")
         onClicked: {
@@ -48,9 +51,9 @@ PullDownMenu {
             var pg = pageStack.push(Qt.resolvedUrl("../pages/SecondPage.qml"), {
                                         "lunasModel": model
                                     })
-            updateAfterManage = true
+            root.profilesEdited()
             pg.lunaSelected.connect(function (idx) {
-                activeLunaIdx = idx
+                root.profileSelected(idx)
             })
         }
     }
