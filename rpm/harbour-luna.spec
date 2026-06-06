@@ -41,7 +41,7 @@ Displays the menstruation, ovulation and PMS days in a calendar.
 # >> build pre
 # << build pre
 
-%qtc_qmake5 DEFINES+=LUNA_VERSION=\\\\\\\"\"%{version}\\\\\\\"\"
+%qtc_qmake5 
 
 %qtc_make %{?_smp_mflags}
 
