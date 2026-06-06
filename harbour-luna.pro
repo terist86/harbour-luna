@@ -24,17 +24,17 @@ OTHER_FILES += qml/harbour-luna.qml \
     qml/pages/NotesPage.qml \
     qml/pages/EditNoteDlg.qml \
     qml/pages/EditBleedingDlg.qml \
-    qml/pages/Qlecti.js \
-    qml/pages/Persistence.js \
-    qml/pages/Algo.js \
-    qml/pages/controls/ValueButtonEx.qml \
+    qml/scripts/Qlecti.js \
+    qml/scripts/Persistence.js \
+    qml/scripts/Algo.js \
+    qml/controls/ValueButtonEx.qml \
     rpm/harbour-luna.changes \
     rpm/harbour-luna.spec \
     rpm/harbour-luna.yaml \
     translations/*.ts \
     harbour-luna.desktop
 
-SAILFISHAPP_ICONS = 86x86 108x108 128x128 256x256
+SAILFISHAPP_ICONS = 86x86 108x108 128x128 256x256 scalable
 #SAILFISHAPP_ICONS = 86x86
 
 # to disable building translations every time, comment out the
@@ -51,8 +51,17 @@ DISTFILES += \
     qml/components/LunaCalendar.qml \
     qml/pages/AboutPage.qml \
     qml/pages/DailyDetail.qml \
-    qml/pages/Luna.js \
-    qml/pages/Note.js \
-    qml/pages/components/BleedingForm.qml \
-    qml/pages/components/SettingsMenu.qml
+    qml/scripts/Luna.js \
+    qml/scripts/Note.js \
+    qml/components/BleedingForm.qml \
+    qml/components/SettingsMenu.qml
 
+resources.files = \
+    icons/scalable/blood-drop.svg \
+    icons/scalable/condom.svg \
+    icons/scalable/kiss.svg \
+    icons/scalable/love.svg \
+    icons/scalable/temperature.svg
+resources.prefix = /
+
+RESOURCES += resources

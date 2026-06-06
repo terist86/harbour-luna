@@ -4,10 +4,16 @@ import "../scripts/Algo.js" as Algo
 import "../scripts/Bleeding.js" as Bleeding
 
 Item {
+    id: root
     property int cellWidth: width / 7
     property int cellHeight: cellWidth
     property bool daysVisible: false
     property var lunaInfo
+
+    property alias date: datePicker.date
+
+    signal editNote(var date)
+    signal editBleeding(var date)
 
     width: parent.width
     height: datePicker.height + weekDaysSimulator.height
@@ -39,51 +45,31 @@ Item {
         anchors.top: weekDaysSimulator.bottom
 
         delegate: Component {
-            Rectangle {
+            ListItem {
                 id: rect
                 width: cellWidth
                 height: cellHeight
-                radius: 2
-                color: rectColor(model.day, model.month, model.year)
-                border.color: borderColor(model.day, model.month, model.year)
-                border.width: borderColor(model.day, model.month,
-                                          model.year) !== 'transparent' ? 1 : 0
 
-                function rectColor(day, month, year) {
-                    var _bleeding = Bleeding.get(lunaInfo.dbid,
-                                                 Date.UTC(year, month - 1, day))
-                    if (!!_bleeding) {
-                        return Theme.rgba(
-                                    Algo.MN_COLOR,
-                                    Math.min(1.0,
-                                             0.2 * (1 + _bleeding.intensity)))
-                    }
-                    return 'transparent'
+                property var cellDate: Date.UTC(model.year, model.month - 1,
+                                                model.day)
+
+                contentHeight: height
+                contentWidth: width
+
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.margins: 1
+                    radius: 8
+                    color: 'transparent'
+                    border.color: 'transparent'
+                    border.width: 0
                 }
 
-                function borderColor(day, month, year) {
-                    var d = Date.UTC(year, month - 1, day)
-                    var _bleeding = Bleeding.get(lunaInfo.dbid, d)
-                    if (!_bleeding) {
-                        var _doc = Algo.daysInCycle(lunaInfo.cycle,
-                                                    lunaInfo.day1ms, d)
-                        if (_doc === 0)
-                            return Theme.rgba(Algo.MN_COLOR, 1.0)
-                    }
-                    return 'transparent'
-                }
-
-                function rectIcon(day, month, year) {
-                    if (lunaInfo) {
-                        var d = Algo.daysInCycle(lunaInfo.cycle,
-                                                 lunaInfo.day1ms,
-                                                 Date.UTC(year, month - 1, day))
-                        var icon = lunaInfo.iconArr[d]
-                        if (icon === 0) {
-                            return 'image://theme/icon-s-alarm'
-                        }
-                    }
-                    return ''
+                function getBleeding() {
+                    if (!lunaInfo)
+                        return null
+                    var res = Bleeding.get(lunaInfo.dbid, cellDate)
+                    return res !== "" ? res : null
                 }
 
                 Label {
@@ -96,16 +82,70 @@ Item {
                     text: model.day
                     font.pixelSize: Theme.fontSizeMedium
                     font.bold: _today
-                    color: Theme.primaryColor
                 }
 
+                Image {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    source: 'qrc:/icons/scalable/temperature.svg'
+                    visible: false
+                    width: Theme.iconSizeExtraSmall
+                    height: width
+                }
 
-                /*TBD Image {
+                Row {
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    source: rectIcon(model.day, model.month, model.year)
-                    scale: 0.75
-                }*/
+                    anchors.margins: Theme.paddingSmall
+                    spacing: -Theme.paddingSmall / 2
+
+                    Repeater {
+                        model: {
+                            var b = getBleeding()
+                            return b ? b.intensity + 1 : 0
+                        }
+                        Image {
+                            source: 'qrc:/icons/scalable/blood-drop.svg'
+                            width: Theme.iconSizeExtraSmall / 1.5
+                            height: width
+                        }
+                    }
+                }
+
+                Row {
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    spacing: -Theme.paddingSmall / 2
+
+                    Image {
+                        source: 'qrc:/icons/scalable/kiss.svg'
+                        visible: false
+                        width: Theme.iconSizeExtraSmall
+                        height: width
+                    }
+                    Image {
+                        source: 'qrc:/icons/scalable/condom.svg'
+                        visible: false
+                        width: Theme.iconSizeExtraSmall
+                        height: width
+                    }
+                    Image {
+                        source: 'qrc:/icons/scalable/love.svg'
+                        visible: false
+                        width: Theme.iconSizeExtraSmall
+                        height: width
+                    }
+                }
+
+                onClicked: {
+                    datePicker.date = new Date(cellDate)
+                }
+
+                onDoubleClicked: {
+                    var _d = new Date(cellDate)
+                    datePicker.date = _d
+                    editBleeding(_d)
+                }
             }
         }
     }

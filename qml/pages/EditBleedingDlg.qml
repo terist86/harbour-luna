@@ -39,44 +39,43 @@ Dialog {
     id: page
 
     property alias bleedingInfo: bleedingForm.model
+    property alias date: bleedingDayRow.selectedDate
     property bool updateAfterManage: false
 
     DialogHeader {
         id: header
-        title: bleedingInfo.dbid !== 0 ? qsTr("Edit bleeding") : qsTr(
-                                             "Add bleeding")
+        title: bleedingInfo
+               && bleedingInfo.dbid !== 0 ? qsTr("Edit bleeding") : qsTr(
+                                                "Add bleeding")
     }
 
     SilicaFlickable {
-        anchors.top: header.bottom
-        anchors.bottom: page.bottom
-        anchors.left: page.left
-        anchors.right: page.right
-        clip: true
-
+        anchors.fill: parent
         contentHeight: column.height
 
         PushUpMenu {
             id: pushUpMenu
-            visible: bleedingInfo.dbid !== 0
+            visible: bleedingInfo && bleedingInfo.dbid !== 0
 
             MenuItem {
                 text: qsTr("Remove")
                 onClicked: {
-                    var remorse = Remorse.popupAction(
-                                page, qsTr("Bleeding was removed"),
-                                function () {
-                                    Bleeding.remove(bleedingInfo)
-                                }).canceled.connect(function () {
-                                    Notices.show("Bleeding was not removed",
-                                                 Notice.Short, Notice.Center)
-                                })
+                    Remorse.popupAction(page, qsTr("Bleeding was removed"),
+                                        function () {
+                                            if (Bleeding.remove(
+                                                        bleedingInfo) === "OK") {
+                                                updateAfterManage = true
+                                                page.accept()
+                                            }
+                                        })
                 }
             }
         }
 
         Column {
             id: column
+            anchors.top: parent.top
+            anchors.topMargin: header.height
             spacing: Theme.paddingLarge
             width: parent.width
 
@@ -85,76 +84,70 @@ Dialog {
             }
 
             Row {
-                id: bleeding_day
+                id: bleedingDayRow
                 width: parent.width - 2 * Theme.horizontalPageMargin
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: Theme.paddingMedium
 
                 property var selectedDate: new Date(Algo.todayMS())
                 onSelectedDateChanged: loadDataForDay()
+
                 function loadDataForDay() {
-                    datePicker.value = selectedDate.toLocaleDateString()
+                    var ms = Algo.dateToUtcTimestamp(selectedDate)
+                    var _existing = Bleeding.get(bleedingInfo.lunaId, ms)
 
-                    var _bleedingInfo = Bleeding.get(bleedingInfo.lunaId,
-                                                     Algo.dateToUtcTimestamp(
-                                                         selectedDate))
-
-                    if (!!_bleedingInfo) {
-                        bleedingInfo.dbid = _bleedingInfo.dbid
-                        bleedingInfo.intensity = _bleedingInfo.intensity
-                        bleedingInfo.excluded = _bleedingInfo.excluded
+                    if (_existing) {
+                        bleedingInfo.dbid = _existing.dbid
+                        bleedingInfo.intensity = _existing.intensity
+                        bleedingInfo.excluded = _existing.excluded
+                        bleedingInfo.day = _existing.day
                     } else {
                         bleedingInfo.dbid = 0
+                        bleedingInfo.intensity = -1
+                        bleedingInfo.excluded = false
+                        bleedingInfo.day = ms
                     }
-
-                    header.title = bleedingInfo.dbid !== 0 ? qsTr("Edit bleeding") : qsTr(
-                                                                 "Add bleeding")
+                    // Trigger update in form
+                    bleedingForm.modelChanged()
                 }
 
                 IconButton {
                     id: prevDay
                     icon.source: "image://theme/icon-m-left"
-                    function setPrevDay() {
-                        var currentDate = bleeding_day.selectedDate
-                        currentDate.setDate(currentDate.getDate() - 1)
-                        bleeding_day.selectedDate = currentDate
+                    onClicked: {
+                        var d = new Date(bleedingDayRow.selectedDate)
+                        d.setDate(d.getDate() - 1)
+                        bleedingDayRow.selectedDate = d
                     }
-
-                    onClicked: setPrevDay()
                 }
-                Column {
-                    width: parent.width - prevDay.width - nextDay.width - 2 * spacing
-                    ValueButton {
-                        id: datePicker
-                        function openDateDialog() {
 
-                            var dialog = pageStack.push(
-                                        "Sailfish.Silica.DatePickerDialog", {
-                                            "date": bleeding_day.selectedDate
-                                        })
-                            dialog.accepted.connect(function () {
-                                bleeding_day.selectedDate = dialog.date
-                            })
-                        }
-
-                        value: bleeding_day.selectedDate.toLocaleDateString()
-                        onClicked: openDateDialog()
+                ValueButton {
+                    id: datePickerButton
+                    width: parent.width - prevDay.width - nextDay.width - 2 * parent.spacing
+                    label: qsTr("Date")
+                    value: Qt.formatDate(bleedingDayRow.selectedDate,
+                                         Qt.DefaultLocaleShortDate)
+                    onClicked: {
+                        var dialog = pageStack.push(
+                                    "Sailfish.Silica.DatePickerDialog", {
+                                        "date": bleedingDayRow.selectedDate
+                                    })
+                        dialog.accepted.connect(function () {
+                            bleedingDayRow.selectedDate = dialog.date
+                        })
                     }
                 }
 
                 IconButton {
                     id: nextDay
                     icon.source: "image://theme/icon-m-right"
-                    function setNextDay() {
-                        var currentDate = bleeding_day.selectedDate
-                        currentDate.setDate(currentDate.getDate() + 1)
-                        bleeding_day.selectedDate = currentDate
+                    enabled: bleedingDayRow.selectedDate < new Date(Algo.todayMS(
+                                                                        ))
+                    onClicked: {
+                        var d = new Date(bleedingDayRow.selectedDate)
+                        d.setDate(d.getDate() + 1)
+                        bleedingDayRow.selectedDate = d
                     }
-
-                    enabled: bleeding_day.selectedDate < new Date(Algo.todayMS(
-                                                                      ))
-
-                    onClicked: setNextDay()
                 }
             }
 
@@ -171,52 +164,21 @@ Dialog {
     }
 
     Component.onCompleted: {
-        if (bleedingInfo.dbid !== 0) {
-            bleeding_day.value = Qt.formatDate(new Date(bleedingInfo.day))
-            intensity.value = bleedingInfo.intensity
-            exclude.checked = bleedingInfo.excluded
+        if (bleedingInfo && bleedingInfo.dbid !== 0) {
+            bleedingDayRow.selectedDate = new Date(bleedingInfo.day)
         }
-    }
-
-    canAccept: {
-
-        return bleeding_day.selectedDate.length > 0
     }
 
     onAccepted: {
-        var update = false
-
-        var day
-        if (bleeding_day.selectedDate) {
-            day = Algo.dateToUtcTimestamp(bleeding_day.selectedDate)
+        if (bleedingInfo.dbid === 0) {
+            var savedDay = bleedingInfo.day
+            Bleeding.persist(bleedingInfo)
+            Bleeding.autoFillMissingPeriodDays(bleedingInfo.lunaId, savedDay)
         } else {
-            day = Algo.todayMS()
+            Bleeding.update(bleedingInfo)
         }
-
-        if (bleedingInfo.day !== day) {
-            update = true
-            bleedingInfo.day = day
-        }
-
-        if (bleedingInfo.intensity !== intensity.value) {
-            update = true
-            bleedingInfo.intensity = intensity.value
-        }
-
-        if (bleedingInfo.excluded !== exclude.checked) {
-            update = true
-            bleedingInfo.excluded = exclude.checked
-        }
-
-        if (update) {
-            if (bleedingInfo.dbid === 0) {
-                var dbid = Bleeding.persist(bleedingInfo)
-                console.log("New bleeding record created with dbid = " + dbid)
-            } else {
-                Bleeding.update(bleedingInfo)
-                console.log("Bleeding record with dbid = " + bleedingInfo.dbid
-                            + " has been updated")
-            }
-        }
+        updateAfterManage = true
     }
+
+    canAccept: bleedingDayRow.selectedDate <= new Date(Algo.todayMS()) && bleedingForm.intensity >= 0
 }

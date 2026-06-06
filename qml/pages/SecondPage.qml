@@ -34,6 +34,7 @@ import "../scripts/Qlecti.js" as Ql
 import "../scripts/Algo.js" as Algo
 import "../scripts/Luna.js" as Luna
 import "../scripts/Note.js" as Note
+import "../scripts/Bleeding.js" as Bleeding
 
 Page {
     id: page
@@ -44,7 +45,9 @@ Page {
 
     function addOrUpdateLuna(g, idx) {
         //console.log(g, idx);
-        var _daysInCycle = Algo.daysInCycle(g.cycle, g.day1ms)
+        var actualDay1ms = Bleeding.getActualDay1ms(g.dbid)
+        var effectiveDay1ms = actualDay1ms !== "" ? actualDay1ms : g.day1ms
+        var _daysInCycle = Algo.daysInCycle(g.cycle, effectiveDay1ms)
         g.dayInCycle = _daysInCycle + 1
         var ov = Algo.nextOvDays(_daysInCycle, g.cycle)
         var mn = Algo.nextMnDays(_daysInCycle, g.cycle)

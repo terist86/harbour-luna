@@ -63,22 +63,8 @@ Page {
                 visible: lunasModel.count > 0
                 onClicked: {
                     var _lunaInfo = lunasModel.get(lunaView.currentIndex)
-                    var _noteInfo = Note.get(_lunaInfo.dbid,
-                                             _lunaInfo.dayInCycle - 1)
-                    if (_noteInfo === '') {
-                        _noteInfo = Note.emptyNoteInfo(_lunaInfo.dbid,
-                                                       _lunaInfo.dayInCycle - 1)
-                    }
-
-                    var dialog = pageStack.push(Qt.resolvedUrl(
-                                                    "EditNoteDlg.qml"), {
-                                                    "noteInfo": _noteInfo
-                                                })
-                    dialog.accepted.connect(function () {
-                        lunasModel.setProperty(lunaView.currentIndex,
-                                               "noteTitle",
-                                               dialog.noteInfo.title)
-                    })
+                    page.editNoteForDate(_lunaInfo.dbid,
+                                         _lunaInfo.dayInCycle - 1, new Date())
                 }
             }
             MenuItem {
@@ -86,21 +72,7 @@ Page {
                 visible: lunasModel.count > 0
                 onClicked: {
                     var _lunaInfo = lunasModel.get(lunaView.currentIndex)
-                    var _bleedingInfo = Bleeding.get(_lunaInfo.dbid,
-                                                     Algo.todayMS())
-                    if (_bleedingInfo === '') {
-                        _bleedingInfo = Bleeding.emptyBleedingInfo(
-                                    _lunaInfo.dbid)
-                    }
-
-                    var dialog = pageStack.push(Qt.resolvedUrl(
-                                                    "EditBleedingDlg.qml"), {
-                                                    "bleedingInfo": _bleedingInfo
-                                                })
-                    dialog.accepted.connect(function () {
-                        console.log("Bleeding accepted")
-                        updateAfterManage = true
-                    })
+                    page.editBleedingForDate(_lunaInfo.dbid, datePicker.date)
                 }
             }
         }
@@ -127,7 +99,20 @@ Page {
                 height: Theme.paddingMedium
             }
             LunaCalendar {
+                id: datePicker
                 lunaInfo: dateColumn.pickerLunaInfo
+                onEditNote: {
+                    var ms = Algo.dateToUtcTimestamp(date)
+                    var _lunaInfo = lunasModel.get(lunaView.currentIndex)
+                    var effectiveDay1ms = _lunaInfo.effectiveDay1ms || _lunaInfo.day1ms
+                    var _doc = Algo.daysInCycle(_lunaInfo.cycle,
+                                                effectiveDay1ms, ms)
+                    page.editNoteForDate(_lunaInfo.dbid, _doc, date)
+                }
+                onEditBleeding: {
+                    var _lunaInfo = lunasModel.get(lunaView.currentIndex)
+                    page.editBleedingForDate(_lunaInfo.dbid, date)
+                }
             }
         }
         Item {
@@ -278,7 +263,7 @@ Page {
                                     opacitys[g.dayInCycle - 1])
         }
 
-        //TBD Persistence.noteIcons(icons, g.dbid);
+        Note.icons(icons, g.dbid)
         //console.log(icons);
         dateColumn.pickerLunaInfo = {
             "colorArr": colors,
@@ -307,15 +292,23 @@ Page {
         Persistence.initialize()
         Luna.populate(lunasModel)
 
+        Ql.on(lunasModel).each(function (g) {
+            Bleeding.autoFillMissingPeriodDays(g.dbid)
+        })
+
         var curDayMS = Algo.todayMS()
 
         Ql.on(lunasModel).each(function (g, i) {
-            var _daysInCycle = Algo.daysInCycle(g.cycle, g.day1ms, curDayMS)
+            var actualDay1ms = Bleeding.getActualDay1ms(g.dbid)
+            var effectiveDay1ms = actualDay1ms !== "" ? actualDay1ms : g.day1ms
+
+            var _daysInCycle = Algo.daysInCycle(g.cycle, effectiveDay1ms, curDayMS)
             var ov = Algo.nextOvDays(_daysInCycle, g.cycle)
             var mn = Algo.nextMnDays(_daysInCycle, g.cycle)
             var today = Algo.formatDays(0)
 
             lunasModel.setProperty(i, "dayInCycle", _daysInCycle + 1)
+            lunasModel.setProperty(i, "effectiveDay1ms", effectiveDay1ms)
             lunasModel.setProperty(i, "nextOv", Algo.formatDays(ov))
             lunasModel.setProperty(i, "coverOv", ov === 0 ? today : String(ov))
             lunasModel.setProperty(i, "nextMn", Algo.formatDays(mn))
@@ -326,5 +319,42 @@ Page {
             fillLunaInfo(luna)
         })
         lunaView.model = lunasModel
+    }
+
+    function editNoteForDate(dbid, idx, date) {
+        var _noteInfo = Note.get(dbid, idx)
+        if (_noteInfo === '') {
+            _noteInfo = Note.emptyNoteInfo(dbid, idx)
+            _noteInfo.day = Algo.dateToUtcTimestamp(date)
+        }
+
+        var dialog = pageStack.push(Qt.resolvedUrl("EditNoteDlg.qml"), {
+                                        "noteInfo": _noteInfo
+                                    })
+        dialog.accepted.connect(function () {
+            if (lunaView.currentIndex >= 0) {
+                lunasModel.setProperty(lunaView.currentIndex, "noteTitle",
+                                       dialog.noteInfo.title)
+            }
+            updateAfterManage = true
+        })
+    }
+
+    function editBleedingForDate(dbid, date) {
+        var ms = Algo.dateToUtcTimestamp(date)
+        var _bleedingInfo = Bleeding.get(dbid, ms)
+        if (_bleedingInfo === '') {
+            _bleedingInfo = Bleeding.emptyBleedingInfo(dbid)
+            _bleedingInfo.day = ms
+        }
+
+        var dialog = pageStack.push(Qt.resolvedUrl("EditBleedingDlg.qml"), {
+                                        "bleedingInfo": _bleedingInfo,
+                                        "date": date
+                                    })
+        dialog.accepted.connect(function () {
+            console.log("Bleeding accepted")
+            updateAfterManage = true
+        })
     }
 }

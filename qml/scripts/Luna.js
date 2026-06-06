@@ -10,11 +10,10 @@ function populate(model) {
     })
 }
 
-function get(lunaId) {
+function get(dbid) {
     var res = ""
     Persistence.database().readTransaction(function (tx) {
-        res = "OK"
-        var rs = tx.executeSql("SELECT * FROM lunas WHERE lunaId=?", [lunaId])
+        var rs = tx.executeSql("SELECT * FROM lunas WHERE dbid=?", [dbid])
         if (rs.rows.length === 1) {
             res = rs.rows.item(0)
         } else {

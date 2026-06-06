@@ -410,14 +410,14 @@ var ng = function() {
 	function _initCurve() {
 		var globalProp = "__qlecti_ng_easingObj";
 
-		var easingObj = Qt.applicaton[globalProp];
+		var easingObj = Qt.application[globalProp];
 		if (!easingObj) {
 			var qml = 'import "easing.js" as Easing;'
 			+ ' QtObject {'
 			+ ' property var easingDef;'
 			+ ' Component.onCompleted: easingDef = Easing.easing} ';
-			easingObj = Qt.createQmlObject(qml, Qt.applicaton, 'qlecti.dynamic');
-			Qt.applicaton[globalProp] = easingObj;
+			easingObj = Qt.createQmlObject(qml, Qt.application, 'qlecti.dynamic');
+			Qt.application[globalProp] = easingObj;
 		}
 	};
 
