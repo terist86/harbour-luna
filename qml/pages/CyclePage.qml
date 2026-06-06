@@ -95,6 +95,7 @@ Page {
                 lunaInfo: dateColumn.pickerLunaInfo
                 onShowDayDetail: {
                     var _lunaInfo = lunasModel.get(lunaView.currentIndex)
+                    updateAfterManage = true
                     pageStack.push(Qt.resolvedUrl("DailyDetail.qml"), {
                                        "lunaId": _lunaInfo.dbid,
                                        "selectedDate": date

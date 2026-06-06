@@ -21,8 +21,8 @@ function emptySexInfo(lunaId) {
         "dbid": 0,
         "lunaId": lunaId,
         "day": Algo.todayMS(),
-        "time_of_day": -1,
-        "solo": 0,
+        "time_of_day": undefined,
+        "solo": undefined,
         "contraceptives": "[]",
         "ejaculation": 0,
         "timestamp": Date.now()

@@ -19,9 +19,11 @@ Dialog {
     }
 
     SilicaFlickable {
-        anchors.fill: parent
-        contentHeight: column.height
+        anchors{
+            fill: parent
+        }
 
+        contentHeight: column.height + Theme.paddingLarge * 2
         PushUpMenu {
             id: pushUpMenu
             visible: sexInfo && sexInfo.dbid !== 0
@@ -106,10 +108,6 @@ Dialog {
                 }
             }
 
-            SectionHeader {
-                text: qsTr("Sex")
-            }
-
             SexForm {
                 id: sexForm
             }
@@ -132,5 +130,5 @@ Dialog {
         }
     }
 
-    canAccept: sexInfo && sexInfo.time_of_day >= 0 && sexInfo.solo >= 0
+    canAccept: sexInfo && sexForm.timeOfDay >=0
 }

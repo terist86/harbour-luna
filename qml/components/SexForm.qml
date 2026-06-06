@@ -5,6 +5,8 @@ import "../scripts/Sex.js" as Sex
 Column {
     id: root
     property var model
+    property alias isSolo: soloRow.isSolo
+    property alias timeOfDay: timeOfDayComboBox.currentIndex
 
     property bool _contraceptionUsed: false
 
@@ -27,48 +29,25 @@ Column {
         root.model.contraceptives = JSON.stringify(arr)
     }
 
-    Label {
-        text: qsTr("Time of day")
-        color: Theme.highlightColor
-        font.pixelSize: Theme.fontSizeSmall
-        anchors.left: parent.left
-        anchors.leftMargin: Theme.horizontalPageMargin
-    }
-
     Row {
         width: parent.width - 2 * Theme.horizontalPageMargin
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: Theme.paddingSmall
 
-        Repeater {
-            model: Sex.timeOfDayLabels.length
-            delegate: BackgroundItem {
-                width: (parent.width - (Sex.timeOfDayLabels.length - 1) * parent.spacing) / Sex.timeOfDayLabels.length
-                height: Theme.itemSizeSmall
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: Theme.paddingSmall
-                    color: root.model && root.model.time_of_day === index
-                           ? Theme.rgba(Theme.highlightColor, 0.3)
-                           : Theme.rgba(Theme.primaryColor, 0.1)
-                    border.width: root.model && root.model.time_of_day === index ? 1 : 0
-                    border.color: Theme.highlightColor
-                }
-
-                Label {
-                    anchors.centerIn: parent
-                    text: Sex.timeOfDayLabels[index]
-                    font.pixelSize: Theme.fontSizeTiny
-                    color: root.model && root.model.time_of_day === index
-                           ? Theme.highlightColor : Theme.primaryColor
-                    horizontalAlignment: Text.AlignHCenter
-                    wrapMode: Text.WordWrap
-                }
-
-                onClicked: {
-                    if (root.model) {
-                        root.model.time_of_day = index
+        ComboBox {
+            id: timeOfDayComboBox
+            label: qsTr("Time of day")
+            currentIndex: root.model.time_of_day
+            menu: ContextMenu {
+                Repeater {
+                    model: Sex.timeOfDayLabels.length
+                    delegate: MenuItem {
+                        text: qsTr(Sex.timeOfDayLabels[index])
+                        onClicked: {
+                            if (root.model) {
+                                root.model.time_of_day = index
+                            }
+                        }
                     }
                 }
             }
@@ -76,80 +55,95 @@ Column {
     }
 
     SectionHeader {
-        text: qsTr("Were you sexually active today?")
+        text: qsTr("Who did you have sex with today?")
     }
 
     Row {
+        id: soloRow
         width: parent.width - 2 * Theme.horizontalPageMargin
         anchors.horizontalCenter: parent.horizontalCenter
+        height: Theme.itemSizeSmall
         spacing: Theme.paddingMedium
 
-        Button {
-            text: qsTr("Solo")
-            highlighted: root.model && root.model.solo === 1
+        property bool isSolo: model ? !!model.solo : false
+
+        BackgroundItem {
+            width: parent.width / 2
+            height: parent.height
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: parent.width - Theme.paddingSmall
+                height: Theme.paddingMedium
+                radius: 4
+                color: soloRow.isSolo ? Theme.highlightColor : Theme.primaryColor
+            }
+
+            Label {
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: qsTr("Solo")
+                font.pixelSize: Theme.fontSizeSmall
+                color: soloRow.isSolo ? Theme.highlightColor : Theme.primaryColor
+            }
+
             onClicked: {
                 if (root.model) {
                     root.model.solo = 1
                     root.model.ejaculation = 0
                     root.model.contraceptives = "[]"
                     _contraceptionUsed = false
+                    soloRow.isSolo = true
                 }
             }
         }
 
-        Button {
-            text: qsTr("Partner")
-            highlighted: root.model && root.model.solo === 0
+        BackgroundItem {
+            width: parent.width / 2
+            height: parent.height
+
+            Rectangle {
+                anchors.centerIn: parent
+                width: parent.width - Theme.paddingSmall
+                height: Theme.paddingMedium
+                radius: 4
+                color: !soloRow.isSolo ? Theme.highlightColor : Theme.primaryColor
+            }
+
+            Label {
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: qsTr("Partner")
+                font.pixelSize: Theme.fontSizeSmall
+                color: !soloRow.isSolo ? Theme.highlightColor : Theme.primaryColor
+            }
+
             onClicked: {
                 if (root.model) {
                     root.model.solo = 0
+                    soloRow.isSolo = false
                 }
             }
         }
     }
 
-    Row {
-        width: parent.width - 2 * Theme.horizontalPageMargin
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: Theme.paddingMedium
-        visible: root.model && root.model.solo === 0
-
-        Label {
-            text: qsTr("Did you use contraceptives?")
-            color: Theme.highlightColor
-            font.pixelSize: Theme.fontSizeSmall
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
-        Button {
-            text: qsTr("No")
-            highlighted: root.model && root.model.solo === 0 && !_contraceptionUsed
-            onClicked: {
-                if (root.model) {
-                    root.model.contraceptives = "[]"
-                    _contraceptionUsed = false
-                }
-            }
-        }
-
-        Button {
-            text: qsTr("Yes")
-            highlighted: root.model && root.model.solo === 0 && _contraceptionUsed
-            onClicked: {
-                _contraceptionUsed = true
-            }
-        }
-    }
-
-    Repeater {
-        model: root.model && root.model.solo === 0 && _contraceptionUsed
-               ? Sex.contraceptiveLabels.length : 0
-        delegate: TextSwitch {
-            text: Sex.contraceptiveLabels[index]
-            checked: root.model ? _contraceptives().indexOf(index) >= 0 : false
-            onCheckedChanged: {
-                if (root.model) {
-                    _toggleContraceptive(index)
+    ExpandingSection {
+        id: contraceptiveSection
+        title: qsTr("Protected sex")
+        visible: !soloRow.isSolo && Sex.contraceptiveLabels.length > 0
+        content.sourceComponent: Column {
+            width: contraceptiveSection.width
+            Repeater {
+                model: Sex.contraceptiveLabels.length
+                delegate: TextSwitch {
+                    text: Sex.contraceptiveLabels[index]
+                    checked: root.model ? _contraceptives().indexOf(index) >= 0 : false
+                    onCheckedChanged: {
+                        if (root.model) {
+                            _toggleContraceptive(index)
+                            _contraceptionUsed = _contraceptives().length > 0
+                        }
+                    }
                 }
             }
         }
@@ -157,8 +151,8 @@ Column {
 
     TextSwitch {
         text: qsTr("Ejaculation into vagina?")
-        visible: root.model && root.model.solo === 0 && !_contraceptionUsed
-        checked: root.model ? !!root.model.ejaculation : false
+        visible: !soloRow.isSolo
+        checked: _contraceptionUsed
         onCheckedChanged: {
             if (root.model) {
                 root.model.ejaculation = checked ? 1 : 0
@@ -168,10 +162,10 @@ Column {
 
     onModelChanged: {
         if (model) {
-            if (model.time_of_day === undefined) model.time_of_day = -1
-            if (model.solo === undefined) model.solo = 0
+            if (model.time_of_day === undefined) model.time_of_day = Sex.timeOfDayLabels.length - 1
+            if (model.solo === undefined) model.solo = -1
             if (model.contraceptives === undefined) model.contraceptives = "[]"
-            if (model.ejaculation === undefined) model.ejaculation = 0
+            if (model.ejaculation === undefined) model.ejaculation = -1
             _contraceptionUsed = _contraceptives().length > 0
         }
     }
