@@ -18,7 +18,6 @@ Item {
         __renderVersion++
     }
 
-    signal editNote(var date)
     signal editBleeding(var date)
 
     width: parent.width

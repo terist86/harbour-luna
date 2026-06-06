@@ -35,7 +35,6 @@ import "../scripts/Persistence.js" as Persistence
 import "../scripts/Algo.js" as Algo
 import "../scripts/Bleeding.js" as Bleeding
 import "../scripts/Luna.js" as Luna
-import "../scripts/Note.js" as Note
 import "../components"
 
 Page {
@@ -59,15 +58,6 @@ Page {
             MenuItem {
                 text: qsTr("Go to today")
                 onClicked: datePicker.date = new Date()
-            }
-            MenuItem {
-                text: qsTr("Edit day note")
-                visible: lunasModel.count > 0
-                onClicked: {
-                    var _lunaInfo = lunasModel.get(lunaView.currentIndex)
-                    page.editNoteForDate(_lunaInfo.dbid,
-                                         _lunaInfo.dayInCycle - 1, new Date())
-                }
             }
             MenuItem {
                 text: qsTr("Edit bleeding")
@@ -103,14 +93,6 @@ Page {
             LunaCalendar {
                 id: datePicker
                 lunaInfo: dateColumn.pickerLunaInfo
-                onEditNote: {
-                    var ms = Algo.dateToUtcTimestamp(date)
-                    var _lunaInfo = lunasModel.get(lunaView.currentIndex)
-                    var effectiveDay1ms = _lunaInfo.effectiveDay1ms || _lunaInfo.day1ms
-                    var _doc = Algo.daysInCycle(_lunaInfo.cycle,
-                                                effectiveDay1ms, ms)
-                    page.editNoteForDate(_lunaInfo.dbid, _doc, date)
-                }
                 onEditBleeding: {
                     var _lunaInfo = lunasModel.get(lunaView.currentIndex)
                     page.editBleedingForDate(_lunaInfo.dbid, date)
@@ -143,9 +125,8 @@ Page {
 
                     Column {
                         id: labels
-                        property bool hasNote: !!model.noteTitle
                         width: parent.width
-                        spacing: hasNote ? -Theme.paddingSmall : -1
+                        spacing: -1
                         Label {
                             id: name
                             width: parent.width
@@ -173,13 +154,6 @@ Page {
                             id: nextMn
                             label: qsTr("Next menstruation")
                             value: model.nextMn
-                        }
-                        DetailItem {
-                            id: note
-                            label: qsTr("Note title")
-                            rightMargin: Theme.paddingSmall
-                            visible: labels.hasNote
-                            value: model.noteTitle
                         }
                     }
                 }
@@ -238,10 +212,8 @@ Page {
     function fillLunaInfo(g) {
         var colors = []
         var opacitys = []
-        var icons = []
         colors[g.cycle] = undefined
         opacitys[g.cycle] = undefined
-        icons[g.cycle] = undefined
 
         if (g.pms > Algo.PMS_OFF) {
             Ql.ng().loop(g.cycle - g.pms, g.pms, function (i, p) {
@@ -272,11 +244,9 @@ Page {
                                     opacitys[g.dayInCycle - 1])
         }
 
-        Note.icons(icons, g.dbid)
         dateColumn.pickerLunaInfo = {
             "colorArr": colors,
             "opacityArr": opacitys,
-            "iconArr": icons,
             "cycle": g.cycle,
             "day1ms": g.effectiveDay1ms || g.day1ms,
             "dbid": g.dbid
@@ -318,31 +288,10 @@ Page {
             lunasModel.setProperty(i, "coverOv", ov === 0 ? today : String(ov))
             lunasModel.setProperty(i, "nextMn", Algo.formatDays(mn))
             lunasModel.setProperty(i, "coverMn", mn === 0 ? today : String(mn))
-            lunasModel.setProperty(i, "noteTitle", Note.title(g.dbid,
-                                                              _daysInCycle))
         }).first(function (luna) {
             fillLunaInfo(luna)
         })
         lunaView.model = lunasModel
-    }
-
-    function editNoteForDate(dbid, idx, date) {
-        var _noteInfo = Note.get(dbid, idx)
-        if (_noteInfo === '') {
-            _noteInfo = Note.emptyNoteInfo(dbid, idx)
-            _noteInfo.day = Algo.dateToUtcTimestamp(date)
-        }
-
-        var dialog = pageStack.push(Qt.resolvedUrl("EditNoteDlg.qml"), {
-                                        "noteInfo": _noteInfo
-                                    })
-        dialog.accepted.connect(function () {
-            if (lunaView.currentIndex >= 0) {
-                lunasModel.setProperty(lunaView.currentIndex, "noteTitle",
-                                       dialog.noteInfo.title)
-            }
-            updateAfterManage = true
-        })
     }
 
     function editBleedingForDate(dbid, date) {

@@ -174,8 +174,7 @@ Dialog {
                 "name": String(name.text).trim(),
                 "cycle": cycleLength.value,
                 "day1ms": dt.getTime(),
-                "pms": pmsCount.value,
-                "noteTitle": ''
+                "pms": pmsCount.value
             }
 
             var dbid = Luna.persist(luna)

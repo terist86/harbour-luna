@@ -33,7 +33,6 @@ import Sailfish.Silica 1.0
 import "../scripts/Qlecti.js" as Ql
 import "../scripts/Algo.js" as Algo
 import "../scripts/Luna.js" as Luna
-import "../scripts/Note.js" as Note
 import "../scripts/Bleeding.js" as Bleeding
 
 Page {
@@ -59,7 +58,6 @@ Page {
         g.nextMn = Algo.formatDays(mn)
         g.coverMn = mn === 0 ? today : String(mn)
         if (idx >= 0) {
-            g.noteTitle = Note.title(g.dbid, _daysInCycle)
             lunasModel.set(idx, g)
         } else {
             lunasModel.append(g)
@@ -120,15 +118,6 @@ Page {
                 }
             }
 
-            function manageNotes() {
-                var dialog = pageStack.push(Qt.resolvedUrl("NotesPage.qml"),
-                                            propLunaInfo(index))
-                dialog.currentNoteChanged.connect(function (newTitle) {
-                    console.log(index, newTitle)
-                    lunasModel.setProperty(index, "noteTitle", newTitle)
-                })
-            }
-
             function editLuna() {
                 var dialog = pageStack.push(Qt.resolvedUrl("EditLunaDlg.qml"), {
                                                 "lunaInfo": page.lunasModel.get(
@@ -145,7 +134,6 @@ Page {
                 var dbid = model.dbid
                 remorseAction(qsTr("Deleting"), function () {
                     page.lunasModel.remove(idx)
-                    Note.removeAll(dbid)
                     Luna.remove(dbid)
                 })
             }
@@ -155,10 +143,6 @@ Page {
                 ContextMenu {
                     id: itemInfo
 
-                    MenuItem {
-                        text: qsTr("Manage day notes")
-                        onClicked: manageNotes()
-                    }
                     MenuItem {
                         text: qsTr("Edit")
                         onClicked: editLuna()

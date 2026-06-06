@@ -21,8 +21,6 @@ OTHER_FILES += qml/harbour-luna.qml \
     qml/pages/FirstPage.qml \
     qml/pages/SecondPage.qml \
     qml/pages/EditLunaDlg.qml \
-    qml/pages/NotesPage.qml \
-    qml/pages/EditNoteDlg.qml \
     qml/pages/EditBleedingDlg.qml \
     qml/scripts/Qlecti.js \
     qml/scripts/Persistence.js \
@@ -52,7 +50,6 @@ DISTFILES += \
     qml/pages/AboutPage.qml \
     qml/pages/DailyDetail.qml \
     qml/scripts/Luna.js \
-    qml/scripts/Note.js \
     qml/components/BleedingForm.qml \
     qml/components/SettingsMenu.qml
 
