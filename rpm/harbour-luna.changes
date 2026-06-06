@@ -1,11 +1,18 @@
 # - Summary of changes
 
+* Sun Jun 07 2026 Ladislav Galadik <terist@duck.com> 0.2
+- Add sexual activity tracking with daily detail page
+- Add sex form: time of day, solo/partner, contraceptives, ejaculation
+- Show love/condom icons on calendar for protected/unprotected sex
+- Remove deprecated Notes functionality
+- Rename FirstPage → CyclePage, SecondPage → ProfilesPage
+- Dynamic page header title from selected profile
+- Fix calendar refresh after editing records
+- Add bleeding tracking
+
 * Thu Feb 16 2017 Sebastian J. Wolf <sebastian@ygriega.de> 0.1
 - Fork from SailGirlz
 - Removing sexism
 - Minor cleanups
-
-* Ladislav Galadik 0.2
-- Add bleeding tracking
 
 
