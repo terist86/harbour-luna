@@ -89,7 +89,7 @@ Dialog {
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: Theme.paddingMedium
 
-                property var selectedDate: new Date(Algo.todayMS())
+                property var selectedDate: Algo.utcTimestampToDate(Algo.todayMS())
                 onSelectedDateChanged: loadDataForDay()
 
                 function loadDataForDay() {
@@ -141,7 +141,7 @@ Dialog {
                 IconButton {
                     id: nextDay
                     icon.source: "image://theme/icon-m-right"
-                    enabled: bleedingDayRow.selectedDate < new Date(Algo.todayMS(
+                    enabled: bleedingDayRow.selectedDate < Algo.utcTimestampToDate(Algo.todayMS(
                                                                         ))
                     onClicked: {
                         var d = new Date(bleedingDayRow.selectedDate)
@@ -165,7 +165,7 @@ Dialog {
 
     Component.onCompleted: {
         if (bleedingInfo && bleedingInfo.dbid !== 0) {
-            bleedingDayRow.selectedDate = new Date(bleedingInfo.day)
+            bleedingDayRow.selectedDate = Algo.utcTimestampToDate(bleedingInfo.day)
         }
     }
 
@@ -180,5 +180,5 @@ Dialog {
         }
     }
 
-    canAccept: bleedingDayRow.selectedDate <= new Date(Algo.todayMS()) && bleedingForm.intensity >= 0
+    canAccept: bleedingDayRow.selectedDate <= Algo.utcTimestampToDate(Algo.todayMS()) && bleedingForm.intensity >= 0
 }

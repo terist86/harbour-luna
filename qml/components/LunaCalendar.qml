@@ -151,11 +151,11 @@ Item {
                 }
 
                 onClicked: {
-                    datePicker.date = new Date(cellDate)
+                    datePicker.date = Algo.utcTimestampToDate(cellDate)
                 }
 
                 onDoubleClicked: {
-                    var _d = new Date(cellDate)
+                    var _d = Algo.utcTimestampToDate(cellDate)
                     datePicker.date = _d
                     showDayDetail(_d)
                 }

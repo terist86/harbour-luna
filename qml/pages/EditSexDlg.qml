@@ -59,7 +59,7 @@ Dialog {
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: Theme.paddingMedium
 
-                property var selectedDate: new Date(Algo.todayMS())
+                property var selectedDate: Algo.utcTimestampToDate(Algo.todayMS())
                 onSelectedDateChanged: loadDataForDay()
 
                 function loadDataForDay() {
@@ -99,7 +99,7 @@ Dialog {
                 IconButton {
                     id: nextDay
                     icon.source: "image://theme/icon-m-right"
-                    enabled: sexDayRow.selectedDate < new Date(Algo.todayMS())
+                    enabled: sexDayRow.selectedDate < Algo.utcTimestampToDate(Algo.todayMS())
                     onClicked: {
                         var d = new Date(sexDayRow.selectedDate)
                         d.setDate(d.getDate() + 1)
@@ -118,7 +118,7 @@ Dialog {
 
     Component.onCompleted: {
         if (sexInfo && sexInfo.dbid !== 0 && sexInfo.day) {
-            sexDayRow.selectedDate = new Date(sexInfo.day)
+            sexDayRow.selectedDate = Algo.utcTimestampToDate(sexInfo.day)
         }
     }
 

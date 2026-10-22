@@ -29,6 +29,7 @@ function initialize() {
         })
         db = database()
         console.log("Upgrade db to version 1.1")
+        ver = "1.1"
     }
     if (ver === "1.1") {
         db.changeVersion("1.1", "1.2", function (tx) {
@@ -37,6 +38,7 @@ function initialize() {
         })
         db = database()
         console.log("Upgrade db to version 1.2")
+        ver = "1.2"
     }
     console.log("Current db version '" + db.version + "'")
 }

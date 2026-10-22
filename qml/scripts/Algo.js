@@ -17,9 +17,16 @@ function todayMS() {
     return dateToUtcTimestamp(new Date())
 }
 
+// Days are stored as UTC-midnight timestamps of the *local* calendar date
 function dateToUtcTimestamp(date) {
     var dt = new Date(date)
-    return Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate())
+    return Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate())
+}
+
+// Inverse of dateToUtcTimestamp: local-midnight Date for a stored day
+function utcTimestampToDate(ms) {
+    var dt = new Date(ms)
+    return new Date(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate())
 }
 
 function daysInCycle(cycle, day1ms, curDayMS) {
@@ -60,7 +67,7 @@ function formatDays(d) {
     if (d === 1) {
         return qsTr("tomorrow")
     }
-    var dt = new Date(todayMS())
+    var dt = utcTimestampToDate(todayMS())
     dt.setDate(dt.getDate() + d)
     return Sl.Format.formatDate(dt, Sl.Formatter.DurationElapsed)
 }

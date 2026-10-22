@@ -88,7 +88,7 @@ Dialog {
                 function openDateDialog() {
                     var _selectedDate = selectedDate
                     if (!_selectedDate) {
-                        _selectedDate = new Date(Algo.todayMS())
+                        _selectedDate = Algo.utcTimestampToDate(Algo.todayMS())
                     }
 
                     var dialog = pageStack.push(
@@ -139,7 +139,7 @@ Dialog {
 
     canAccept: String(name.text).trim().length > 0
     onAccepted: {
-        var dt
+        var day1ms
         if (lunaInfo) {
 
             //console.log(lunaInfo);
@@ -152,9 +152,7 @@ Dialog {
                     || lunaInfo.dayInCycle !== dayInCycle.value) {
                 update = true
                 lunaInfo.cycle = cycleLength.value
-                dt = new Date(Algo.todayMS())
-                dt.setDate(dt.getDate() - dayInCycle.value + 1)
-                lunaInfo.day1ms = dt.getTime()
+                lunaInfo.day1ms = Algo.todayMS() - (dayInCycle.value - 1) * 86400000
             }
             if (lunaInfo.pms !== pmsCount.value) {
                 update = true
@@ -165,15 +163,14 @@ Dialog {
             }
         } else {
             if (dateInCycle.selectedDate) {
-                dt = new Date(Algo.dateToUtcTimestamp(dateInCycle.selectedDate))
+                day1ms = Algo.dateToUtcTimestamp(dateInCycle.selectedDate)
             } else {
-                dt = new Date(Algo.todayMS())
-                dt.setDate(dt.getDate() - dayInCycle.value + 1)
+                day1ms = Algo.todayMS() - (dayInCycle.value - 1) * 86400000
             }
             var luna = {
                 "name": String(name.text).trim(),
                 "cycle": cycleLength.value,
-                "day1ms": dt.getTime(),
+                "day1ms": day1ms,
                 "pms": pmsCount.value
             }
 

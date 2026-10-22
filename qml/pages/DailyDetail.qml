@@ -125,7 +125,7 @@ Page {
                 IconButton {
                     id: nextDay
                     icon.source: "image://theme/icon-m-right"
-                    enabled: selectedDate < new Date(Algo.todayMS())
+                    enabled: selectedDate < Algo.utcTimestampToDate(Algo.todayMS())
                     onClicked: {
                         var d = new Date(selectedDate)
                         d.setDate(d.getDate() + 1)
