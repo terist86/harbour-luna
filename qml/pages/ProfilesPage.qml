@@ -51,7 +51,6 @@ Page {
         var ov = Algo.nextOvDays(_daysInCycle, g.cycle)
         var mn = Algo.nextMnDays(_daysInCycle, g.cycle)
         var today = Algo.formatDays(0)
-        console.log("[DEBUG] addOrUpdateLuna '" + g.name + "': storedDay1ms=" + g.day1ms + " actualDay1ms=" + actualDay1ms + " effectiveDay1ms=" + effectiveDay1ms + " cycle=" + g.cycle + " daysInCycle=" + (_daysInCycle + 1) + " nextOv=" + ov + " nextMn=" + mn)
 
         g.nextOv = Algo.formatDays(ov)
         g.coverOv = ov === 0 ? today : String(ov)

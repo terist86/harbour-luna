@@ -87,7 +87,6 @@ function remove(b) {
 function calculateLunaCycle(lunaId) {
     var starts = _getPeriodStarts(lunaId)
     if (starts.length < 2) {
-        console.log("[DEBUG] calculateLunaCycle lunaId=" + lunaId + " starts.length=" + starts.length + " < 2, returning empty")
         return ""
     }
 
@@ -111,7 +110,6 @@ function calculateLunaCycle(lunaId) {
     }
 
     if (filtered.length === 0) {
-        console.log("[DEBUG] calculateLunaCycle lunaId=" + lunaId + " no valid intervals (20-45d) after filtering, returning empty")
         return ""
     }
 
@@ -120,8 +118,6 @@ function calculateLunaCycle(lunaId) {
         sum += filtered[i]
     }
     var avgCycle = sum / filtered.length
-
-    console.log("[DEBUG] calculateLunaCycle lunaId=" + lunaId + " chronological=[" + chronological.join(",") + "] intervals=[" + intervals.join(",") + "] filtered=[" + filtered.join(",") + "] avg=" + avgCycle + " day1ms=" + starts[0])
 
     return {
         "day1ms": starts[0],
@@ -151,14 +147,12 @@ function _getPeriodStarts(lunaId) {
             }
         }
     })
-    console.log("[DEBUG] _getPeriodStarts lunaId=" + lunaId + " starts=" + JSON.stringify(starts))
     return starts.reverse()
 }
 
 function getActualDay1ms(lunaId) {
     var starts = _getPeriodStarts(lunaId)
     var res = starts.length > 0 ? starts[0] : ""
-    console.log("[DEBUG] getActualDay1ms lunaId=" + lunaId + " starts=[" + starts.join(",") + "] return=" + res)
     return res
 }
 
@@ -167,13 +161,11 @@ function autoFillMissingPeriodDays(lunaId, savedDay) {
     if (!luna) return
     var day1ms = luna.day1ms
     if (!day1ms) {
-        console.log("[DEBUG] autoFillMissingPeriodDays lunaId=" + lunaId + " no day1ms, skip")
         return
     }
 
     var starts = _getPeriodStarts(lunaId)
     if (starts.length === 0) {
-        console.log("[DEBUG] autoFillMissingPeriodDays lunaId=" + lunaId + " no period starts, skip")
         return
     }
 
@@ -190,7 +182,6 @@ function autoFillMissingPeriodDays(lunaId, savedDay) {
         refStart = starts[0]
         refEnd = refStart + 365 * 86400000
     }
-    console.log("[DEBUG] autoFillMissingPeriodDays lunaId=" + lunaId + " day1ms=" + day1ms + " savedDay=" + savedDay + " refStart=" + refStart + " refEnd=" + refEnd)
 
     var today = Algo.todayMS()
 
@@ -199,7 +190,6 @@ function autoFillMissingPeriodDays(lunaId, savedDay) {
             "SELECT day, intensity FROM bleedings WHERE lunaId=? AND day>=? AND day<? AND NOT excluded ORDER BY day ASC",
             [lunaId, refStart, refEnd])
         if (rs.rows.length === 0) {
-            console.log("[DEBUG] autoFill: no ref period entries, skip")
             return
         }
 
@@ -237,7 +227,6 @@ function autoFillMissingPeriodDays(lunaId, savedDay) {
         }
 
         var fillEnd = savedDay !== undefined ? Math.min(savedDay, today) : today
-        console.log("[DEBUG] autoFill: refDuration=" + refDuration + " fillEnd=" + fillEnd + " today=" + today)
 
         // When using next/current period as fallback, don't fill before refStart
         var fillStart = refStart > day1ms ? refStart : day1ms
@@ -255,7 +244,6 @@ function autoFillMissingPeriodDays(lunaId, savedDay) {
 
             var intensity = refIntensity[offset - startOffset]
             if (intensity !== undefined) {
-                console.log("[DEBUG] autoFill: offset=" + offset + " fill day=" + currentDay + " intensity=" + intensity)
                 tx.executeSql(
                     "INSERT INTO bleedings (lunaId, day, intensity, excluded) VALUES (?, ?, ?, ?)",
                     [lunaId, currentDay, intensity, false])
@@ -263,7 +251,6 @@ function autoFillMissingPeriodDays(lunaId, savedDay) {
         }
     })
 
-    console.log("[DEBUG] autoFill: calling updateLunaCycle for lunaId=" + lunaId)
     updateLunaCycle(lunaId)
 }
 
@@ -277,6 +264,5 @@ function updateLunaCycle(lunaId) {
     if (_luna.day1ms !== actualDay1ms) {
         _luna.day1ms = actualDay1ms
         Luna.update(_luna)
-        console.log("[DEBUG] updateLunaCycle lunaId=" + lunaId + " updated day1ms to " + actualDay1ms)
     }
 }

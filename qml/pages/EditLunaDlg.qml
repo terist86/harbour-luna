@@ -175,7 +175,6 @@ Dialog {
             }
 
             var dbid = Luna.persist(luna)
-            console.log(dbid)
             luna['dbid'] = parseInt(dbid)
             lunaInfo = luna
         }

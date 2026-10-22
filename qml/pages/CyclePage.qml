@@ -284,7 +284,6 @@ Page {
             var mn = Algo.nextMnDays(_daysInCycle, g.cycle)
             var today = Algo.formatDays(0)
 
-            console.log("[DEBUG] luna[" + i + "] '" + g.name + "': storedDay1ms=" + g.day1ms + " actualDay1ms=" + actualDay1ms + " effectiveDay1ms=" + effectiveDay1ms + " cycle=" + g.cycle + " daysInCycle=" + (_daysInCycle + 1) + " nextOv=" + ov + " nextMn=" + mn)
 
             lunasModel.setProperty(i, "dayInCycle", _daysInCycle + 1)
             lunasModel.setProperty(i, "effectiveDay1ms", effectiveDay1ms)
@@ -311,7 +310,6 @@ Page {
                                         "date": date
                                     })
         dialog.accepted.connect(function () {
-            console.log("Bleeding accepted")
             updateAfterManage = true
         })
     }
