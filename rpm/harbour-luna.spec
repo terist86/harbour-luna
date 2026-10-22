@@ -16,7 +16,7 @@ Summary:    An application for tracking the women's cycle
 Version:    0.3
 Release:    1
 Group:      Qt/Qt
-License:    BSD (3-clause)
+License:    BSD-3-Clause
 URL:        https://github.com/terist86/harbour-luna
 Source0:    %{name}-%{version}.tar.bz2
 Source100:  harbour-luna.yaml
@@ -63,7 +63,7 @@ desktop-file-install --delete-original       \
 
 %files
 %defattr(-,root,root,-)
-%{_bindir}
+%{_bindir}/%{name}
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
