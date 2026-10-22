@@ -13,7 +13,7 @@ Name:       harbour-luna
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    An application for tracking the women's cycle
-Version:    0.3
+Version:    0.4
 Release:    1
 Group:      Qt/Qt
 License:    BSD-3-Clause
@@ -43,7 +43,8 @@ Displays the menstruation, ovulation and PMS days in a calendar.
 # >> build pre
 # << build pre
 
-%qtc_qmake5 
+%qtc_qmake5  \
+  VERSION=%{version}
 
 %qtc_make %{?_smp_mflags}
 

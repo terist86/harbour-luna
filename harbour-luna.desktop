@@ -5,3 +5,7 @@ Icon=harbour-luna
 Exec=harbour-luna
 Name=Luna
 
+[X-Sailjail]
+Permissions=Documents;Downloads
+OrganizationName=io.github.terist86
+ApplicationName=harbour-luna

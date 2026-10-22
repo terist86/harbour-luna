@@ -1,6 +1,7 @@
 
 /*
   Copyright (C) 2017 Sebastian J. Wolf
+  Copyright (C) 2026 Ladislav Galadik
 */
 import QtQuick 2.0
 import Sailfish.Silica 1.0
@@ -53,7 +54,7 @@ Page {
             }
 
             Label {
-                text: qsTr("By Sebastian J. Wolf")
+                text: qsTr("By %1").arg("Ladislav Galadik")
                 font.pixelSize: Theme.fontSizeSmall
                 anchors {
                     horizontalCenter: parent.horizontalCenter
@@ -61,7 +62,7 @@ Page {
             }
 
             Text {
-                text: "<a href=\"mailto:sebastian@ygriega.de\">" + qsTr(
+                text: "<a href=\"mailto:terist@duck.com\">" + qsTr(
                           "Send E-Mail") + "</a>"
                 anchors {
                     horizontalCenter: parent.horizontalCenter
@@ -70,7 +71,7 @@ Page {
                 linkColor: Theme.highlightColor
 
                 onLinkActivated: Qt.openUrlExternally(
-                                     "mailto:sebastian@ygriega.de")
+                                     "mailto:terist@duck.com")
             }
 
             Label {
@@ -82,7 +83,7 @@ Page {
             }
 
             Text {
-                text: "<a href=\"https://github.com/Wunderfitz/harbour-luna\">" + qsTr(
+                text: "<a href=\"https://github.com/terist86/harbour-luna\">" + qsTr(
                           "Sources on GitHub") + "</a>"
                 anchors {
                     horizontalCenter: parent.horizontalCenter
@@ -91,11 +92,35 @@ Page {
                 linkColor: Theme.highlightColor
 
                 onLinkActivated: Qt.openUrlExternally(
-                                     "https://github.com/Wunderfitz/harbour-luna")
+                                     "https://github.com/terist86/harbour-luna")
             }
 
             SectionHeader {
                 text: qsTr("Credits")
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - (2 * Theme.horizontalPageMargin)
+                text: qsTr("Luna was originally created by Sebastian J. Wolf.")
+                font.pixelSize: Theme.fontSizeExtraSmall
+                wrapMode: Text.Wrap
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                }
+            }
+
+            Text {
+                text: "<a href=\"https://github.com/Wunderfitz/harbour-luna\">" + qsTr(
+                          "See sources for the original Luna on GitHub") + "</a>"
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                }
+                font.pixelSize: Theme.fontSizeSmall
+                linkColor: Theme.highlightColor
+
+                onLinkActivated: Qt.openUrlExternally(
+                                     "https://github.com/Wunderfitz/harbour-luna")
             }
 
             Label {

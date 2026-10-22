@@ -14,6 +14,10 @@ TARGET = harbour-luna
 
 CONFIG += sailfishapp
 
+# VERSION is passed by the RPM spec (QMakeOptions); fallback for Qt Creator builds
+isEmpty(VERSION): VERSION = 0.4
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+
 QT += concurrent
 PKGCONFIG += libcrypto
 

@@ -4,7 +4,7 @@
 <context>
     <name>AboutPage</name>
     <message>
-        <location filename="../qml/pages/AboutPage.qml" line="+23"/>
+        <location filename="../qml/pages/AboutPage.qml" line="+24"/>
         <source>About Luna</source>
         <translation type="unfinished"></translation>
     </message>
@@ -20,7 +20,7 @@
     </message>
     <message>
         <location line="+8"/>
-        <source>By Sebastian J. Wolf</source>
+        <source>By %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -45,6 +45,16 @@
     </message>
     <message>
         <location line="+6"/>
+        <source>Luna was originally created by Sebastian J. Wolf.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>See sources for the original Luna on GitHub</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+15"/>
         <source>This project is a fork of SailGirlz developed by Amilcar Santos. SailGirlz is based on MaeGirls by Stefanos Harhalakis. Thanks for making it available under the conditions of the BSD-3-Clause license!</source>
         <translation type="unfinished"></translation>
     </message>

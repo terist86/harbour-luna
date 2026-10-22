@@ -1,5 +1,10 @@
 # - Summary of changes
 
+* Thu Oct 22 2026 Ladislav Galadik <terist@duck.com> 0.4
+- Run in the Sailjail sandbox; existing data is moved to the new location on first start
+- Show the app version on the About page
+- Update About page authorship, contact and source links
+
 * Thu Oct 22 2026 Ladislav Galadik <terist@duck.com> 0.3
 - Add data export/import on the Profiles page, optionally AES-256 encrypted
 - Fix database upgrade on fresh installs (sex logging failed on first run)
