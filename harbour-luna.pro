@@ -64,6 +64,7 @@ DISTFILES += \
     qml/scripts/Luna.js \
     qml/scripts/Sex.js \
     qml/scripts/Backup.js \
+    qml/scripts/Cycle.js \
     qml/pages/ExportPage.qml \
     qml/pages/ImportPage.qml \
     qml/components/BleedingForm.qml \

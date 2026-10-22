@@ -122,6 +122,47 @@ function getActualDay1ms(lunaId) {
     return periods.length > 0 ? periods[periods.length - 1].start : ""
 }
 
+// Statistics of completed cycles (start of one period to the start of the next).
+// A cycle longer than CYCLE_MAX_DAYS is skipped (usually a period that was not
+// logged). A gap longer than CYCLE_BREAK_DAYS (pregnancy, miscarriage, a long
+// pause) ends the measurement: only the cycles after the last such gap count.
+// Average and standard deviation need at least STATS_MIN_CYCLES and use the
+// last STATS_RECENT_CYCLES; they are null otherwise.
+var CYCLE_MAX_DAYS = 45
+var CYCLE_BREAK_DAYS = 90
+var STATS_MIN_CYCLES = 3
+var STATS_RECENT_CYCLES = 6
+
+function cycleStats(lunaId) {
+    var periods = _getPeriods(lunaId)
+    var lengths = []
+    for (var i = 1; i < periods.length; i++) {
+        var length = Math.round((periods[i].start - periods[i - 1].start) / DAY_MS)
+        if (length > CYCLE_BREAK_DAYS) {
+            lengths = []
+        } else if (length <= CYCLE_MAX_DAYS) {
+            lengths.push(length)
+        }
+    }
+    var res = {
+        "count": lengths.length,
+        "shortest": lengths.length > 0 ? Math.min.apply(null, lengths) : null,
+        "longest": lengths.length > 0 ? Math.max.apply(null, lengths) : null,
+        "average": null,
+        "deviation": null
+    }
+    if (lengths.length >= STATS_MIN_CYCLES) {
+        var recent = lengths.slice(-STATS_RECENT_CYCLES)
+        var sum = recent.reduce(function (a, b) { return a + b }, 0)
+        var avg = sum / recent.length
+        var sq = recent.reduce(function (a, b) { return a + (b - avg) * (b - avg) }, 0)
+        res.average = avg
+        // Sample standard deviation
+        res.deviation = Math.sqrt(sq / (recent.length - 1))
+    }
+    return res
+}
+
 // Intensity per day offset of a period; missing days take the previous
 // known intensity (or the next one for leading gaps)
 function _intensityPattern(period) {

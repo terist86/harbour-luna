@@ -152,9 +152,28 @@
     </message>
 </context>
 <context>
+    <name>Cycle</name>
+    <message>
+        <location filename="../qml/scripts/Cycle.js" line="+24"/>
+        <location line="+3"/>
+        <source>%1 days</source>
+        <translation>%1 Tage</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>No completed cycles yet</source>
+        <translation>Noch keine abgeschlossenen Zyklen</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Cycles: %1 · shortest %2 · longest %3 days</source>
+        <translation>Zyklen: %1 · kürzester %2 · längster %3 Tage</translation>
+    </message>
+</context>
+<context>
     <name>CyclePage</name>
     <message>
-        <location filename="../qml/pages/CyclePage.qml" line="+60"/>
+        <location filename="../qml/pages/CyclePage.qml" line="+61"/>
         <source>Go to today</source>
         <translation>Zu heute springen</translation>
     </message>
@@ -500,7 +519,7 @@
 <context>
     <name>ProfilesPage</name>
     <message>
-        <location filename="../qml/pages/ProfilesPage.qml" line="+76"/>
+        <location filename="../qml/pages/ProfilesPage.qml" line="+69"/>
         <source>Export data</source>
         <translation>Daten exportieren</translation>
     </message>
@@ -520,7 +539,7 @@
         <translation>Profile</translation>
     </message>
     <message>
-        <location line="+47"/>
+        <location line="+61"/>
         <source>Deleting</source>
         <translation>Wird gelöscht</translation>
     </message>

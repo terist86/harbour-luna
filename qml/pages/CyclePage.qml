@@ -34,6 +34,7 @@ import "../scripts/Qlecti.js" as Ql
 import "../scripts/Persistence.js" as Persistence
 import "../scripts/Algo.js" as Algo
 import "../scripts/Bleeding.js" as Bleeding
+import "../scripts/Cycle.js" as Cycle
 import "../scripts/Luna.js" as Luna
 import "../components"
 
@@ -143,7 +144,7 @@ Page {
                         DetailItem {
                             id: cycles
                             label: qsTr("Cycle")
-                            value: model.cycle
+                            value: model.cycleText
                         }
                         DetailItem {
                             id: dayincycle
@@ -194,14 +195,8 @@ Page {
         if (status === PageStatus.Activating && updateAfterManage) {
             updateAfterManage = false
             Ql.on(lunasModel).at(lunaView.currentIndex, function (luna) {
-                var actualDay1ms = Bleeding.getActualDay1ms(luna.dbid)
-                if (actualDay1ms !== "") {
-                    lunasModel.setProperty(lunaView.currentIndex, "effectiveDay1ms", actualDay1ms)
-                    if (actualDay1ms !== luna.day1ms) {
-                        lunasModel.setProperty(lunaView.currentIndex, "day1ms", actualDay1ms)
-                    }
-                }
-                page.fillLunaInfo(luna)
+                page.updateLuna(lunaView.currentIndex, Algo.todayMS())
+                page.fillLunaInfo(lunasModel.get(lunaView.currentIndex))
                 datePicker.forceRefresh()
             }).empty(function () {
                 appWindow.coverInfo = undefined
@@ -217,11 +212,12 @@ Page {
     function fillLunaInfo(g) {
         var colors = []
         var opacitys = []
-        colors[g.cycle] = undefined
-        opacitys[g.cycle] = undefined
+        var cycle = g.effectiveCycle || g.cycle
+        colors[cycle] = undefined
+        opacitys[cycle] = undefined
 
         if (g.pms > Algo.PMS_OFF) {
-            Ql.ng().loop(g.cycle - g.pms, g.pms, function (i, p) {
+            Ql.ng().loop(cycle - g.pms, g.pms, function (i, p) {
                 colors[i] = Algo.PMS_COLOR
                 opacitys[i] = (p / g.pms) * 0.5 + 0.1
             })
@@ -231,7 +227,7 @@ Page {
             colors[i] = Algo.MN_COLOR
             opacitys[i] = (Algo.MN_DAYS + 1 - p) / Algo.MN_DAYS * 0.6 + 0.2
         })
-        Ql.ng().loop(g.cycle - Algo.OV_DAYS_BEFORE - Algo.OV_DAYS_SPAN,
+        Ql.ng().loop(cycle - Algo.OV_DAYS_BEFORE - Algo.OV_DAYS_SPAN,
                      Algo.OV_DAYS, function (i, p) {
                          colors[i] = Algo.OV_COLOR
                          var o = 0.75
@@ -252,7 +248,7 @@ Page {
         dateColumn.pickerLunaInfo = {
             "colorArr": colors,
             "opacityArr": opacitys,
-            "cycle": g.cycle,
+            "cycle": cycle,
             "day1ms": g.effectiveDay1ms || g.day1ms,
             "dbid": g.dbid
         }
@@ -266,6 +262,19 @@ Page {
         }
     }
 
+    // Recomputes the derived values of the profile at index i
+    function updateLuna(i, curDayMS) {
+        var g = lunasModel.get(i)
+        var c = Cycle.info(g, curDayMS)
+        if (c.actualDay1ms !== "" && c.actualDay1ms !== g.day1ms) {
+            lunasModel.setProperty(i, "day1ms", c.actualDay1ms)
+        }
+        delete c.actualDay1ms
+        for (var k in c) {
+            lunasModel.setProperty(i, k, c[k])
+        }
+    }
+
     function reloadLunas() {
         lunasModel.clear()
         Luna.populate(lunasModel)
@@ -273,28 +282,11 @@ Page {
         var curDayMS = Algo.todayMS()
 
         Ql.on(lunasModel).each(function (g, i) {
-            var actualDay1ms = Bleeding.getActualDay1ms(g.dbid)
-            var effectiveDay1ms = actualDay1ms !== "" ? actualDay1ms : g.day1ms
-
-            if (actualDay1ms !== "" && actualDay1ms !== g.day1ms) {
-                lunasModel.setProperty(i, "day1ms", actualDay1ms)
-            }
-
-            var _daysInCycle = Algo.daysInCycle(g.cycle, effectiveDay1ms, curDayMS)
-            var ov = Algo.nextOvDays(_daysInCycle, g.cycle)
-            var mn = Algo.nextMnDays(_daysInCycle, g.cycle)
-            var today = Algo.formatDays(0)
-
-            lunasModel.setProperty(i, "dayInCycle", _daysInCycle + 1)
-            lunasModel.setProperty(i, "effectiveDay1ms", effectiveDay1ms)
-            lunasModel.setProperty(i, "nextOv", Algo.formatDays(ov))
-            lunasModel.setProperty(i, "coverOv", ov === 0 ? today : String(ov))
-            lunasModel.setProperty(i, "nextMn", Algo.formatDays(mn))
-            lunasModel.setProperty(i, "coverMn", mn === 0 ? today : String(mn))
-        }).first(function (luna) {
-            fillLunaInfo(luna)
+            updateLuna(i, curDayMS)
         })
-        if (lunasModel.count === 0) {
+        if (lunasModel.count > 0) {
+            fillLunaInfo(lunasModel.get(0))
+        } else {
             appWindow.coverInfo = undefined
             dateColumn.pickerLunaInfo = undefined
         }

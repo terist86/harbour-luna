@@ -152,9 +152,28 @@
     </message>
 </context>
 <context>
+    <name>Cycle</name>
+    <message>
+        <location filename="../qml/scripts/Cycle.js" line="+24"/>
+        <location line="+3"/>
+        <source>%1 days</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>No completed cycles yet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Cycles: %1 · shortest %2 · longest %3 days</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CyclePage</name>
     <message>
-        <location filename="../qml/pages/CyclePage.qml" line="+60"/>
+        <location filename="../qml/pages/CyclePage.qml" line="+61"/>
         <source>Go to today</source>
         <translation type="unfinished"></translation>
     </message>
@@ -500,7 +519,7 @@
 <context>
     <name>ProfilesPage</name>
     <message>
-        <location filename="../qml/pages/ProfilesPage.qml" line="+76"/>
+        <location filename="../qml/pages/ProfilesPage.qml" line="+69"/>
         <source>Export data</source>
         <translation type="unfinished"></translation>
     </message>
@@ -520,7 +539,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+47"/>
+        <location line="+61"/>
         <source>Deleting</source>
         <translation type="unfinished"></translation>
     </message>

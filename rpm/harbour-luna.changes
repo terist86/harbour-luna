@@ -7,6 +7,9 @@
 - Fix bleeding auto-fill writing days into an earlier period
 - Do not treat mid-cycle spotting as the start of a new cycle
 - Fill missing days after a backdated first day of a period
+- Show the average cycle length with its deviation once 3 cycles are recorded and use it for predictions
+- Show the number of recorded cycles and the shortest and longest cycle on the Profiles page
+- Skip cycles of 46-90 days (missed entry) and restart the cycle statistics after a pause over 90 days (e.g. pregnancy)
 
 * Thu Oct 22 2026 Ladislav Galadik <terist@duck.com> 0.3
 - Add data export/import on the Profiles page, optionally AES-256 encrypted

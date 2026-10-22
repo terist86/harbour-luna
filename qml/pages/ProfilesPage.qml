@@ -33,7 +33,7 @@ import Sailfish.Silica 1.0
 import "../scripts/Qlecti.js" as Ql
 import "../scripts/Algo.js" as Algo
 import "../scripts/Luna.js" as Luna
-import "../scripts/Bleeding.js" as Bleeding
+import "../scripts/Cycle.js" as Cycle
 
 Page {
     id: page
@@ -45,18 +45,11 @@ Page {
 
     function addOrUpdateLuna(g, idx) {
         //console.log(g, idx);
-        var actualDay1ms = Bleeding.getActualDay1ms(g.dbid)
-        var effectiveDay1ms = actualDay1ms !== "" ? actualDay1ms : g.day1ms
-        var _daysInCycle = Algo.daysInCycle(g.cycle, effectiveDay1ms)
-        g.dayInCycle = _daysInCycle + 1
-        var ov = Algo.nextOvDays(_daysInCycle, g.cycle)
-        var mn = Algo.nextMnDays(_daysInCycle, g.cycle)
-        var today = Algo.formatDays(0)
-
-        g.nextOv = Algo.formatDays(ov)
-        g.coverOv = ov === 0 ? today : String(ov)
-        g.nextMn = Algo.formatDays(mn)
-        g.coverMn = mn === 0 ? today : String(mn)
+        var c = Cycle.info(g, Algo.todayMS())
+        delete c.actualDay1ms
+        for (var k in c) {
+            g[k] = c[k]
+        }
         if (idx >= 0) {
             lunasModel.set(idx, g)
         } else {
@@ -101,12 +94,26 @@ Page {
         delegate: ListItem {
             id: delegate
             menu: contextMenu
+            contentHeight: Theme.itemSizeMedium
 
-            Label {
-                x: Theme.paddingLarge
-                text: model.name
+            Column {
+                x: Theme.horizontalPageMargin
+                width: parent.width - 2 * x
                 anchors.verticalCenter: parent.verticalCenter
-                color: delegate.highlighted ? Theme.highlightColor : Theme.primaryColor
+
+                Label {
+                    width: parent.width
+                    text: model.name
+                    truncationMode: TruncationMode.Fade
+                    color: delegate.highlighted ? Theme.highlightColor : Theme.primaryColor
+                }
+                Label {
+                    width: parent.width
+                    text: model.statsText || ""
+                    truncationMode: TruncationMode.Fade
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    color: delegate.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
+                }
             }
 
             onClicked: {
