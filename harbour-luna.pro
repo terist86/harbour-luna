@@ -59,9 +59,7 @@ DISTFILES += \
 resources.files = \
     icons/scalable/blood-drop.svg \
     icons/scalable/condom.svg \
-    icons/scalable/kiss.svg \
-    icons/scalable/love.svg \
-    icons/scalable/temperature.svg
+    icons/scalable/love.svg
 resources.prefix = /
 
 RESOURCES += resources

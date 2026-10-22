@@ -52,21 +52,8 @@ function remove(dbid) {
     Persistence.database().transaction(function (tx) {
         tx.executeSql("DELETE FROM bleedings WHERE lunaId=?", [dbid])
         tx.executeSql("DELETE FROM sexual_activity WHERE lunaId=?", [dbid])
-        tx.executeSql("DELETE FROM notes WHERE lunaId=?", [dbid])
         var rs = tx.executeSql("DELETE FROM lunas WHERE dbid=?", [dbid])
         res = rs.rowsAffected === 0 ? "Error" : "OK"
-    })
-    return res
-}
-
-function removeAll() {
-    var res = ""
-    Persistence.database().transaction(function (tx) {
-        res = "OK"
-        var rs = tx.executeSql("DELETE FROM lunas")
-        if (rs.rowsAffected === 0) {
-            res = "Error"
-        }
     })
     return res
 }

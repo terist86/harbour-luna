@@ -15,8 +15,6 @@ function initialize() {
         db.changeVersion("", "1.0", function (tx) {
             tx.executeSql(
                         'CREATE TABLE IF NOT EXISTS lunas(dbid INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, cycle INTEGER, day1ms BIGINT, pms INTEGER)')
-            tx.executeSql(
-                        'CREATE TABLE IF NOT EXISTS notes(dbid INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, note TEXT, icon INTEGER, lunaId INTEGER, idx INTEGER)')
         })
         db = database()
         console.log("Initialize db to version 1.0")
@@ -39,6 +37,14 @@ function initialize() {
         db = database()
         console.log("Upgrade db to version 1.2")
         ver = "1.2"
+    }
+    if (ver === "1.2") {
+        db.changeVersion("1.2", "1.3", function (tx) {
+            tx.executeSql('DROP TABLE IF EXISTS notes')
+        })
+        db = database()
+        console.log("Upgrade db to version 1.3")
+        ver = "1.3"
     }
     console.log("Current db version '" + db.version + "'")
 }

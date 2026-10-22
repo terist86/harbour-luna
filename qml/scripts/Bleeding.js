@@ -15,18 +15,7 @@ function emptyBleedingInfo(lunaId) {
     }
 }
 
-function populate(lunaId, model, withExcluded) {
-    Persistence.database().readTransaction(function (tx) {
-        var rs = tx.executeSql("SELECT * FROM bleedings WHERE lunaId=?"
-                               + (!withExcluded ? " AND NOT excluded" : ""),
-                               [lunaId])
-        for (var i = 0; i < rs.rows.length; i++) {
-            model.append(rs.rows.item(i))
-        }
-    })
-}
-
-function get(lunaId, day, withExcluded) {
+function get(lunaId, day) {
     var res = ""
     Persistence.database().readTransaction(function (tx) {
         var rs = tx.executeSql(
@@ -82,47 +71,6 @@ function remove(b) {
         }
     })
     return res
-}
-
-function calculateLunaCycle(lunaId) {
-    var starts = _getPeriodStarts(lunaId)
-    if (starts.length < 2) {
-        return ""
-    }
-
-    var chronological = []
-    for (var i = starts.length - 1; i >= 0; i--) {
-        chronological.push(starts[i])
-    }
-
-    var intervals = []
-    for (var i = 1; i < chronological.length; i++) {
-        var interval = (chronological[i] - chronological[i - 1]) / 86400000
-        intervals.push(interval)
-    }
-
-    // Filter outliers: only consider intervals between 20 and 45 days
-    var filtered = []
-    for (var i = 0; i < intervals.length; i++) {
-        if (intervals[i] >= 20 && intervals[i] <= 45) {
-            filtered.push(intervals[i])
-        }
-    }
-
-    if (filtered.length === 0) {
-        return ""
-    }
-
-    var sum = 0
-    for (var i = 0; i < filtered.length; i++) {
-        sum += filtered[i]
-    }
-    var avgCycle = sum / filtered.length
-
-    return {
-        "day1ms": starts[0],
-        "cycle": avgCycle
-    }
 }
 
 function _getPeriodStarts(lunaId) {

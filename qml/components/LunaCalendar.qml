@@ -130,15 +130,6 @@ Item {
                     font.bold: _today
                 }
 
-                Image {
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    source: 'qrc:/icons/scalable/temperature.svg'
-                    visible: false
-                    width: Theme.iconSizeExtraSmall
-                    height: width
-                }
-
                 Row {
                     anchors.right: parent.right
                     anchors.top: parent.top
