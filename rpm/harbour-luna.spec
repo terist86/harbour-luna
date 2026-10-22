@@ -13,7 +13,7 @@ Name:       harbour-luna
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    An application for tracking the women's cycle
-Version:    0.2
+Version:    0.3
 Release:    1
 Group:      Qt/Qt
 License:    BSD (3-clause)

@@ -1,5 +1,15 @@
 # - Summary of changes
 
+* Thu Oct 22 2026 Ladislav Galadik <terist@duck.com> 0.3
+- Fix database upgrade on fresh installs (sex logging failed on first run)
+- Fix dates shifting by one day after midnight and when picked from the date picker
+- Delete a profile and all its records in a single transaction
+- Load calendar data per month for faster rendering
+- Drop the unused notes table; notes left over from 0.1 are deleted
+- Complete German translation and enable translation build
+- Add 172x172 launcher icon, update package URL
+- Remove debug logging and dead code
+
 * Sun Jun 07 2026 Ladislav Galadik <terist@duck.com> 0.2
 - Add sexual activity tracking with daily detail page
 - Add sex form: time of day, solo/partner, contraceptives, ejaculation
