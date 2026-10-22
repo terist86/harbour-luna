@@ -52,6 +52,7 @@ Page {
             activeLunaIdx: lunaView.currentIndex
             onProfilesEdited: updateAfterManage = true
             onProfileSelected: lunaView.currentIndex = idx
+            onDataImported: page.reloadLunas()
         }
 
         PushUpMenu {
@@ -265,8 +266,8 @@ Page {
         }
     }
 
-    Component.onCompleted: {
-        Persistence.initialize()
+    function reloadLunas() {
+        lunasModel.clear()
         Luna.populate(lunasModel)
 
         var curDayMS = Algo.todayMS()
@@ -284,7 +285,6 @@ Page {
             var mn = Algo.nextMnDays(_daysInCycle, g.cycle)
             var today = Algo.formatDays(0)
 
-
             lunasModel.setProperty(i, "dayInCycle", _daysInCycle + 1)
             lunasModel.setProperty(i, "effectiveDay1ms", effectiveDay1ms)
             lunasModel.setProperty(i, "nextOv", Algo.formatDays(ov))
@@ -294,7 +294,18 @@ Page {
         }).first(function (luna) {
             fillLunaInfo(luna)
         })
+        if (lunasModel.count === 0) {
+            appWindow.coverInfo = undefined
+            dateColumn.pickerLunaInfo = undefined
+        }
         lunaView.model = lunasModel
+        lunaView.currentIndex = 0
+        datePicker.forceRefresh()
+    }
+
+    Component.onCompleted: {
+        Persistence.initialize()
+        reloadLunas()
     }
 
     function editBleedingForDate(dbid, date) {

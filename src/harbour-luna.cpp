@@ -28,24 +28,26 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifdef QT_QML_DEBUG
-#include <QtQuick>
-#endif
+#include <QGuiApplication>
+#include <QQuickView>
+#include <QScopedPointer>
+#include <QtQml>
 
 #include <sailfishapp.h>
+
+#include "backupfile.h"
 
 
 int main(int argc, char *argv[])
 {
-	// SailfishApp::main() will display "qml/template.qml", if you need more
-	// control over initialization, you can use:
-	//
-	//   - SailfishApp::application(int, char *[]) to get the QGuiApplication *
-	//   - SailfishApp::createView() to get a new QQuickView * instance
-	//   - SailfishApp::pathTo(QString) to get a QUrl to a resource file
-	//
-	// To display the view, call "show()" (will show fullscreen on device).
+	QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
 
-	return SailfishApp::main(argc, argv);
+	qmlRegisterType<BackupFile>("harbour.luna", 1, 0, "BackupFile");
+
+	QScopedPointer<QQuickView> view(SailfishApp::createView());
+	view->setSource(SailfishApp::pathToMainQml());
+	view->show();
+
+	return app->exec();
 }
 

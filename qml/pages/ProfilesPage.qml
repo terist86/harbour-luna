@@ -41,6 +41,7 @@ Page {
     property var lunasModel
 
     signal lunaSelected(int index)
+    signal dataImported()
 
     function addOrUpdateLuna(g, idx) {
         //console.log(g, idx);
@@ -71,6 +72,17 @@ Page {
         ListView.onRemove: animateRemoval(delegate)
 
         PullDownMenu {
+            MenuItem {
+                text: qsTr("Export data")
+                onClicked: pageStack.push(Qt.resolvedUrl("ExportPage.qml"))
+            }
+            MenuItem {
+                text: qsTr("Import data")
+                onClicked: {
+                    var pg = pageStack.push(Qt.resolvedUrl("ImportPage.qml"))
+                    pg.imported.connect(page.dataImported)
+                }
+            }
             MenuItem {
                 text: qsTr("New Profile")
                 onClicked: {

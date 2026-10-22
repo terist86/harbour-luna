@@ -14,7 +14,13 @@ TARGET = harbour-luna
 
 CONFIG += sailfishapp
 
-SOURCES += src/harbour-luna.cpp
+QT += concurrent
+PKGCONFIG += libcrypto
+
+SOURCES += src/harbour-luna.cpp \
+    src/backupfile.cpp
+
+HEADERS += src/backupfile.h
 
 OTHER_FILES += qml/harbour-luna.qml \
     qml/cover/CoverPage.qml \
@@ -53,6 +59,9 @@ DISTFILES += \
     qml/pages/AboutPage.qml \
     qml/scripts/Luna.js \
     qml/scripts/Sex.js \
+    qml/scripts/Backup.js \
+    qml/pages/ExportPage.qml \
+    qml/pages/ImportPage.qml \
     qml/components/BleedingForm.qml \
     qml/components/SexForm.qml \
     qml/components/SettingsMenu.qml

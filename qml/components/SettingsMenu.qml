@@ -43,6 +43,8 @@ PullDownMenu {
     }
     signal profilesEdited()
     signal profileSelected(int idx)
+    signal dataImported()
+
 
     MenuItem {
         text: qsTr("Edit Profiles")
@@ -54,6 +56,7 @@ PullDownMenu {
             pg.lunaSelected.connect(function (idx) {
                 root.profileSelected(idx)
             })
+            pg.dataImported.connect(root.dataImported)
         }
     }
 }

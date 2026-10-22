@@ -144,7 +144,7 @@
 <context>
     <name>CyclePage</name>
     <message>
-        <location filename="../qml/pages/CyclePage.qml" line="+59"/>
+        <location filename="../qml/pages/CyclePage.qml" line="+60"/>
         <source>Go to today</source>
         <translation>Zu heute springen</translation>
     </message>
@@ -361,9 +361,146 @@
     </message>
 </context>
 <context>
+    <name>ExportPage</name>
+    <message>
+        <location filename="../qml/pages/ExportPage.qml" line="+24"/>
+        <source>Export failed</source>
+        <translation>Export fehlgeschlagen</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Export data</source>
+        <translation>Daten exportieren</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>All profiles and records are saved to a file in the Documents folder. The data is sensitive, so protect the file with a password.</source>
+        <translation>Alle Profile und Einträge werden in einer Datei im Ordner „Dokumente“ gespeichert. Die Daten sind sensibel, schützen Sie die Datei daher mit einem Passwort.</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>Password</source>
+        <translation>Passwort</translation>
+    </message>
+    <message>
+        <location line="+11"/>
+        <source>Passwords do not match</source>
+        <translation>Passwörter stimmen nicht überein</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <location line="+1"/>
+        <source>Repeat password</source>
+        <translation>Passwort wiederholen</translation>
+    </message>
+    <message>
+        <location line="+14"/>
+        <source>At least %1 characters</source>
+        <translation>Mindestens %1 Zeichen</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Don&apos;t encrypt</source>
+        <translation>Nicht verschlüsseln</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Anyone with access to the file can read your data</source>
+        <translation>Jeder mit Zugriff auf die Datei kann Ihre Daten lesen</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Export</source>
+        <translation>Exportieren</translation>
+    </message>
+    <message>
+        <location line="+27"/>
+        <source>Saved to %1</source>
+        <translation>Gespeichert unter %1</translation>
+    </message>
+</context>
+<context>
+    <name>ImportPage</name>
+    <message>
+        <location filename="../qml/pages/ImportPage.qml" line="+20"/>
+        <source>Wrong password or damaged file</source>
+        <translation>Falsches Passwort oder beschädigte Datei</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>This backup was created by a newer version of Luna</source>
+        <translation>Diese Sicherung wurde mit einer neueren Version von Luna erstellt</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>The file is not a valid Luna backup</source>
+        <translation>Die Datei ist keine gültige Luna-Sicherung</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Import failed</source>
+        <translation>Import fehlgeschlagen</translation>
+    </message>
+    <message>
+        <location line="+21"/>
+        <source>Select backup</source>
+        <translation>Sicherung auswählen</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Import data</source>
+        <translation>Daten importieren</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Importing replaces all profiles and records currently in the app. This cannot be undone.</source>
+        <translation>Beim Import werden alle Profile und Einträge in der App ersetzt. Dies kann nicht rückgängig gemacht werden.</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>File</source>
+        <translation>Datei</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Select</source>
+        <translation>Auswählen</translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Password</source>
+        <translation>Passwort</translation>
+    </message>
+    <message>
+        <location line="+8"/>
+        <source>Import</source>
+        <translation>Importieren</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Replacing all data</source>
+        <translation>Alle Daten werden ersetzt</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>Data imported</source>
+        <translation>Daten importiert</translation>
+    </message>
+</context>
+<context>
     <name>ProfilesPage</name>
     <message>
-        <location filename="../qml/pages/ProfilesPage.qml" line="+75"/>
+        <location filename="../qml/pages/ProfilesPage.qml" line="+76"/>
+        <source>Export data</source>
+        <translation>Daten exportieren</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Import data</source>
+        <translation>Daten importieren</translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>New Profile</source>
         <translation>Neues Profil</translation>
     </message>
@@ -406,7 +543,7 @@
         <translation>Über Luna</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+9"/>
         <source>Edit Profiles</source>
         <translation>Profile bearbeiten</translation>
     </message>

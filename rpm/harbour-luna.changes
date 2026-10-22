@@ -1,6 +1,7 @@
 # - Summary of changes
 
 * Thu Oct 22 2026 Ladislav Galadik <terist@duck.com> 0.3
+- Add data export/import on the Profiles page, optionally AES-256 encrypted
 - Fix database upgrade on fresh installs (sex logging failed on first run)
 - Fix dates shifting by one day after midnight and when picked from the date picker
 - Delete a profile and all its records in a single transaction
