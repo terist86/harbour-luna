@@ -36,3 +36,22 @@ Makefile*
 # QtCtreator CMake
 CMakeLists.txt.user
 
+# Visual Studio Code
+.vscode
+
+#opencode
+.opencode
+
+#claude
+.claude
+
+.sfdk/
+/*.list
+RPMS/
+
+# Build artefacts
+/harbour-luna
+/qmake_resources.qrc
+
+# Tooling config
+/eslint.config.js
