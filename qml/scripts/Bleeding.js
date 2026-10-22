@@ -71,12 +71,6 @@ function remove(b) {
     return res
 }
 
-function removeAll(lunaId) {
-    Persistence.database().transaction(function (tx) {
-        tx.executeSql("DELETE FROM bleedings WHERE lunaId=?", [lunaId])
-    })
-}
-
 function calculateLunaCycle(lunaId) {
     var starts = _getPeriodStarts(lunaId)
     if (starts.length < 2) {

@@ -34,7 +34,6 @@ import "../scripts/Qlecti.js" as Ql
 import "../scripts/Algo.js" as Algo
 import "../scripts/Luna.js" as Luna
 import "../scripts/Bleeding.js" as Bleeding
-import "../scripts/Sex.js" as Sex
 
 Page {
     id: page
@@ -134,10 +133,9 @@ Page {
                 var idx = index
                 var dbid = model.dbid
                 remorseAction(qsTr("Deleting"), function () {
-                    page.lunasModel.remove(idx)
-                    Bleeding.removeAll(dbid)
-                    Sex.removeAll(dbid)
-                    Luna.remove(dbid)
+                    if (Luna.remove(dbid) === "OK") {
+                        page.lunasModel.remove(idx)
+                    }
                 })
             }
 

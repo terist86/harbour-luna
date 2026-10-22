@@ -46,14 +46,15 @@ function update(g) {
     })
 }
 
+// Removes the profile together with all its records in one transaction
 function remove(dbid) {
     var res = ""
     Persistence.database().transaction(function (tx) {
-        res = "OK"
+        tx.executeSql("DELETE FROM bleedings WHERE lunaId=?", [dbid])
+        tx.executeSql("DELETE FROM sexual_activity WHERE lunaId=?", [dbid])
+        tx.executeSql("DELETE FROM notes WHERE lunaId=?", [dbid])
         var rs = tx.executeSql("DELETE FROM lunas WHERE dbid=?", [dbid])
-        if (rs.rowsAffected === 0) {
-            res = "Error"
-        }
+        res = rs.rowsAffected === 0 ? "Error" : "OK"
     })
     return res
 }

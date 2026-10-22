@@ -86,12 +86,6 @@ function remove(dbid) {
     return res
 }
 
-function removeAll(lunaId) {
-    Persistence.database().transaction(function (tx) {
-        tx.executeSql("DELETE FROM sexual_activity WHERE lunaId=?", [lunaId])
-    })
-}
-
 function isProtected(contraceptivesStr) {
     if (!contraceptivesStr || contraceptivesStr === "[]") return false
     try {
