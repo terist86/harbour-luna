@@ -3,7 +3,7 @@
 .import "Persistence.js" as Persistence
 .import "Algo.js" as Algo
 
-var intensities = ["spotting", "light", "medium", "heavy"]
+var intensities = [qsTr("spotting"), qsTr("light"), qsTr("medium"), qsTr("heavy")]
 
 function emptyBleedingInfo(lunaId) {
     return {

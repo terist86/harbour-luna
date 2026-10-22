@@ -42,7 +42,7 @@ Column {
                 Repeater {
                     model: Sex.timeOfDayLabels.length
                     delegate: MenuItem {
-                        text: qsTr(Sex.timeOfDayLabels[index])
+                        text: Sex.timeOfDayLabels[index]
                         onClicked: {
                             if (root.model) {
                                 root.model.time_of_day = index

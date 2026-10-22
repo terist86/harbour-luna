@@ -27,6 +27,7 @@ OTHER_FILES += qml/harbour-luna.qml \
     qml/scripts/Qlecti.js \
     qml/scripts/Persistence.js \
     qml/scripts/Algo.js \
+    qml/scripts/Bleeding.js \
     qml/controls/ValueButtonEx.qml \
     rpm/harbour-luna.changes \
     rpm/harbour-luna.spec \
@@ -39,7 +40,7 @@ SAILFISHAPP_ICONS = 86x86 108x108 128x128 256x256 scalable
 
 # to disable building translations every time, comment out the
 # following CONFIG line
-#CONFIG += sailfishapp_i18n
+CONFIG += sailfishapp_i18n
 
 # German translation is enabled as an example. If you aren't
 # planning to localize your app, remember to comment out the
