@@ -73,131 +73,108 @@ function remove(b) {
     return res
 }
 
-function _getPeriodStarts(lunaId) {
-    var starts = []
+var DAY_MS = 86400000
+// Bleeding within this many days of a period start belongs to that period
+var PERIOD_WINDOW_DAYS = 7
+
+// Groups the non-excluded bleedings into periods, oldest first:
+// [{ start, end, days: [{ day, intensity }] }]
+// Days with at most one missing day between them form a run. A run with real
+// bleeding starts a new period unless it lies within the window of the previous
+// period's start. Runs of spotting only extend a period within that window but
+// never start one, so mid-cycle spotting does not restart the cycle.
+function _getPeriods(lunaId) {
+    var rows = []
     Persistence.database().readTransaction(function (tx) {
         var rs = tx.executeSql(
-            "SELECT day FROM bleedings WHERE lunaId = ? AND NOT excluded ORDER BY day ASC",
+            "SELECT day, intensity FROM bleedings WHERE lunaId = ? AND NOT excluded ORDER BY day ASC",
             [lunaId])
-        if (rs.rows.length === 0) return
-
-        var candidates = [rs.rows.item(0).day]
-        for (var i = 1; i < rs.rows.length; i++) {
-            if (rs.rows.item(i).day - rs.rows.item(i - 1).day > 86400000) {
-                candidates.push(rs.rows.item(i).day)
-            }
-        }
-
-        starts.push(candidates[0])
-        for (var i = 1; i < candidates.length; i++) {
-            if (candidates[i] - starts[starts.length - 1] >= 7 * 86400000) {
-                starts.push(candidates[i])
-            }
+        for (var i = 0; i < rs.rows.length; i++) {
+            rows.push({ "day": rs.rows.item(i).day, "intensity": rs.rows.item(i).intensity })
         }
     })
-    return starts.reverse()
+
+    var runs = []
+    rows.forEach(function (r) {
+        var run = runs[runs.length - 1]
+        if (run && r.day - run[run.length - 1].day <= 2 * DAY_MS) {
+            run.push(r)
+        } else {
+            runs.push([r])
+        }
+    })
+
+    var periods = []
+    runs.forEach(function (run) {
+        var last = periods[periods.length - 1]
+        if (last && run[0].day - last.start < PERIOD_WINDOW_DAYS * DAY_MS) {
+            last.days = last.days.concat(run)
+            last.end = run[run.length - 1].day
+        } else if (run.some(function (r) { return r.intensity > 0 })) {
+            periods.push({ "start": run[0].day, "end": run[run.length - 1].day, "days": run })
+        }
+    })
+    return periods
 }
 
 function getActualDay1ms(lunaId) {
-    var starts = _getPeriodStarts(lunaId)
-    var res = starts.length > 0 ? starts[0] : ""
-    return res
+    var periods = _getPeriods(lunaId)
+    return periods.length > 0 ? periods[periods.length - 1].start : ""
 }
 
+// Intensity per day offset of a period; missing days take the previous
+// known intensity (or the next one for leading gaps)
+function _intensityPattern(period) {
+    var duration = Math.round((period.end - period.start) / DAY_MS) + 1
+    var pattern = []
+    period.days.forEach(function (r) {
+        pattern[Math.round((r.day - period.start) / DAY_MS)] = r.intensity
+    })
+    var known
+    for (var d = 0; d < duration; d++) {
+        if (pattern[d] === undefined) pattern[d] = known
+        else known = pattern[d]
+    }
+    for (d = duration - 1; d >= 0; d--) {
+        if (pattern[d] === undefined) pattern[d] = known
+        else known = pattern[d]
+    }
+    return pattern
+}
+
+// Fills the missing days of the period that savedDay belongs to, between its
+// first and last logged day. The previous period serves as the reference for
+// length and intensities; without one the period's own pattern is used.
+// Days outside that period are never touched.
 function autoFillMissingPeriodDays(lunaId, savedDay) {
-    var luna = Luna.get(lunaId)
-    if (!luna) return
-    var day1ms = luna.day1ms
-    if (!day1ms) {
-        return
-    }
-
-    var starts = _getPeriodStarts(lunaId)
-    if (starts.length === 0) {
-        return
-    }
-
-    var refStart = null
-    var refEnd = null
-    for (var i = 0; i < starts.length; i++) {
-        if (starts[i] < day1ms) {
-            refStart = starts[i]
-            refEnd = day1ms
+    var periods = _getPeriods(lunaId)
+    var idx = -1
+    for (var i = 0; i < periods.length; i++) {
+        if (periods[i].start <= savedDay && savedDay <= periods[i].end) {
+            idx = i
             break
         }
     }
-    if (refStart === null) {
-        refStart = starts[0]
-        refEnd = refStart + 365 * 86400000
-    }
 
-    var today = Algo.todayMS()
+    if (idx >= 0) {
+        var cur = periods[idx]
+        var ref = idx > 0 ? periods[idx - 1] : cur
+        var pattern = _intensityPattern(ref)
 
-    Persistence.database().transaction(function (tx) {
-        var rs = tx.executeSql(
-            "SELECT day, intensity FROM bleedings WHERE lunaId=? AND day>=? AND day<? AND NOT excluded ORDER BY day ASC",
-            [lunaId, refStart, refEnd])
-        if (rs.rows.length === 0) {
-            return
-        }
-
-        var lastDay = rs.rows.item(rs.rows.length - 1).day
-        var refDuration = Math.floor((lastDay - refStart) / 86400000) + 1
-
-        // Build intensity array with gap-filling from the reference period
-        var refIntensity = []
-        for (var r = 0; r < rs.rows.length; r++) {
-            var row = rs.rows.item(r)
-            var idx = Math.round((row.day - refStart) / 86400000)
-            refIntensity[idx] = row.intensity
-        }
-        // Fill gaps: look back for last known intensity
-        for (var d = 1; d < refDuration; d++) {
-            if (refIntensity[d] === undefined) {
-                for (var b = d - 1; b >= 0; b--) {
-                    if (refIntensity[b] !== undefined) {
-                        refIntensity[d] = refIntensity[b]
-                        break
-                    }
-                }
-            }
-        }
-        // Fill leading gaps: look forward for next known intensity
-        for (var d = refDuration - 2; d >= 0; d--) {
-            if (refIntensity[d] === undefined) {
-                for (var f = d + 1; f < refDuration; f++) {
-                    if (refIntensity[f] !== undefined) {
-                        refIntensity[d] = refIntensity[f]
-                        break
-                    }
-                }
-            }
-        }
-
-        var fillEnd = savedDay !== undefined ? Math.min(savedDay, today) : today
-
-        // When using next/current period as fallback, don't fill before refStart
-        var fillStart = refStart > day1ms ? refStart : day1ms
-        var startOffset = Math.round((fillStart - day1ms) / 86400000)
-
-        for (var offset = startOffset; offset < refDuration; offset++) {
-            var currentDay = day1ms + offset * 86400000
-            if (currentDay > fillEnd) break
-            if (currentDay === savedDay) continue
-
-            var exists = tx.executeSql(
-                "SELECT dbid FROM bleedings WHERE lunaId=? AND day=?",
-                [lunaId, currentDay])
-            if (exists.rows.length > 0) continue
-
-            var intensity = refIntensity[offset - startOffset]
-            if (intensity !== undefined) {
+        Persistence.database().transaction(function (tx) {
+            for (var day = cur.start + DAY_MS; day < cur.end; day += DAY_MS) {
+                var intensity = pattern[Math.round((day - cur.start) / DAY_MS)]
+                if (intensity === undefined) break
+                var exists = tx.executeSql(
+                    "SELECT dbid FROM bleedings WHERE lunaId=? AND day=?",
+                    [lunaId, day])
+                if (exists.rows.length > 0) continue
                 tx.executeSql(
                     "INSERT INTO bleedings (lunaId, day, intensity, excluded) VALUES (?, ?, ?, ?)",
-                    [lunaId, currentDay, intensity, false])
+                    [lunaId, day, intensity, false])
             }
-        }
-    })
+        })
+    }
 
     updateLunaCycle(lunaId)
 }
