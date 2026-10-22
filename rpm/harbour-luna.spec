@@ -17,7 +17,7 @@ Version:    0.2
 Release:    1
 Group:      Qt/Qt
 License:    BSD (3-clause)
-URL:        https://github.com/Wunderfitz/harbour-luna
+URL:        https://github.com/terist86/harbour-luna
 Source0:    %{name}-%{version}.tar.bz2
 Source100:  harbour-luna.yaml
 Requires:   sailfishsilica-qt5 >= 0.10.9
