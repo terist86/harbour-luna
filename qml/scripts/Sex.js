@@ -42,6 +42,19 @@ function getAll(lunaId, day) {
     return res
 }
 
+function getRange(lunaId, fromDay, toDay) {
+    var res = []
+    Persistence.database().readTransaction(function (tx) {
+        var rs = tx.executeSql(
+            "SELECT * FROM sexual_activity WHERE lunaId=? AND day>=? AND day<?",
+            [lunaId, fromDay, toDay])
+        for (var i = 0; i < rs.rows.length; i++) {
+            res.push(rs.rows.item(i))
+        }
+    })
+    return res
+}
+
 function get(dbid) {
     var res = ""
     Persistence.database().readTransaction(function (tx) {

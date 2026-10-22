@@ -14,9 +14,49 @@ Item {
     property alias date: datePicker.date
 
     property int __renderVersion: 0
+    // "lunaId:year-month" -> { dayMs: { bleeding, protectedSex, unprotectedSex } }
+    property var __monthCache: ({})
 
     function forceRefresh() {
+        __monthCache = {}
         __renderVersion++
+    }
+
+    onLunaInfoChanged: __monthCache = {}
+
+    function _dayEntry(days, ms) {
+        if (!days[ms]) {
+            days[ms] = { "bleeding": null, "protectedSex": false, "unprotectedSex": false }
+        }
+        return days[ms]
+    }
+
+    // Loads a whole month with one query per table; cells then read from the cache
+    function loadDay(lunaId, ms) {
+        var d = new Date(ms)
+        var y = d.getUTCFullYear()
+        var m = d.getUTCMonth()
+        var key = lunaId + ":" + y + "-" + m
+        var days = __monthCache[key]
+        if (!days) {
+            days = {}
+            var from = Date.UTC(y, m, 1)
+            var to = Date.UTC(y, m + 1, 1)
+            Bleeding.getRange(lunaId, from, to).forEach(function (b) {
+                _dayEntry(days, b.day).bleeding = b
+            })
+            Sex.getRange(lunaId, from, to).forEach(function (e) {
+                if (e.solo === 1) return
+                var n
+                try { n = JSON.parse(e.contraceptives || "[]").length }
+                catch (ex) { return }
+                var entry = _dayEntry(days, e.day)
+                if (n > 0) entry.protectedSex = true
+                else entry.unprotectedSex = true
+            })
+            __monthCache[key] = days
+        }
+        return days[ms] || null
     }
 
     signal showDayDetail(var date)
@@ -71,18 +111,12 @@ Item {
                     border.width: 0
                 }
 
-                property var bleedingData: {
+                property var dayData: {
                     root.__renderVersion
                     if (!lunaInfo) return null
-                    var res = Bleeding.get(lunaInfo.dbid, cellDate)
-                    return res !== "" ? res : null
+                    return root.loadDay(lunaInfo.dbid, cellDate)
                 }
-
-                property var sexData: {
-                    root.__renderVersion
-                    if (!lunaInfo) return []
-                    return Sex.getAll(lunaInfo.dbid, cellDate) || []
-                }
+                property var bleedingData: dayData ? dayData.bleeding : null
 
                 Label {
                     property bool _today: {
@@ -128,23 +162,13 @@ Item {
 
                     Image {
                         source: 'qrc:/icons/scalable/condom.svg'
-                        visible: sexData && sexData.some(function(e) {
-                            if (e.solo === 1) return false
-                            var c = e.contraceptives || "[]"
-                            try { return JSON.parse(c).length > 0 }
-                            catch (ex) { return false }
-                        })
+                        visible: dayData ? dayData.protectedSex : false
                         width: Theme.iconSizeExtraSmall
                         height: width
                     }
                     Image {
                         source: 'qrc:/icons/scalable/love.svg'
-                        visible: sexData && sexData.some(function(e) {
-                            if (e.solo === 1) return false
-                            var c = e.contraceptives || "[]"
-                            try { return JSON.parse(c).length === 0 }
-                            catch (ex) { return false }
-                        })
+                        visible: dayData ? dayData.unprotectedSex : false
                         width: Theme.iconSizeExtraSmall
                         height: width
                     }

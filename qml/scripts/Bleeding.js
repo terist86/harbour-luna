@@ -39,6 +39,19 @@ function get(lunaId, day, withExcluded) {
     return res
 }
 
+function getRange(lunaId, fromDay, toDay) {
+    var res = []
+    Persistence.database().readTransaction(function (tx) {
+        var rs = tx.executeSql(
+                    "SELECT * FROM bleedings WHERE lunaId=? AND day>=? AND day<?",
+                    [lunaId, fromDay, toDay])
+        for (var i = 0; i < rs.rows.length; i++) {
+            res.push(rs.rows.item(i))
+        }
+    })
+    return res
+}
+
 function persist(b) {
     var res = ""
     Persistence.database().transaction(function (tx) {
